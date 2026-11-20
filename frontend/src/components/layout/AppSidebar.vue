@@ -1,9 +1,11 @@
 <template>
   <aside
+    id="app-sidebar"
     class="sidebar"
+    @keydown.esc="closeMobile"
     :class="[
       sidebarCollapsed ? 'w-[72px]' : 'w-64',
-      { '-translate-x-full lg:translate-x-0': !mobileOpen }
+      { 'invisible -translate-x-full lg:visible lg:translate-x-0': !mobileOpen }
     ]"
   >
     <!-- Logo/Brand -->
@@ -11,7 +13,8 @@
       <!-- Custom Logo or Default Logo -->
       <router-link
         :to="homePath"
-        class="sidebar-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl shadow-glow transition-opacity hover:opacity-80"
+        class="sidebar-logo flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg transition-opacity hover:opacity-80"
+        :aria-label="siteName"
         @click="handleMenuItemClick(homePath)"
       >
         <img v-if="settingsLoaded" :src="siteLogo || '/logo.svg'" alt="Logo" class="h-full w-full object-contain" />
@@ -19,7 +22,7 @@
       <div class="sidebar-brand" :class="{ 'sidebar-brand-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
         <router-link
           :to="homePath"
-          class="sidebar-brand-title text-lg font-bold text-gray-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
+          class="sidebar-brand-title text-base font-semibold tracking-tight text-gray-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
           @click="handleMenuItemClick(homePath)"
         >
           {{ siteName }}
@@ -62,7 +65,7 @@
                 </span>
               </button>
               <!-- Children -->
-              <div v-if="!sidebarCollapsed && isGroupExpanded(item)" class="mb-1 ml-4 border-l border-gray-200 pl-2 dark:border-dark-600">
+              <div v-if="!sidebarCollapsed && isGroupExpanded(item)" class="sidebar-divider mb-1 ml-4 border-l pl-2 dark:border-dark-600">
                 <router-link
                   v-for="child in item.children"
                   :key="child.path"
@@ -148,7 +151,7 @@
     </nav>
 
     <!-- Bottom Section -->
-    <div class="mt-auto border-t border-gray-100 p-3 dark:border-dark-800">
+    <div class="sidebar-divider mt-auto border-t p-3">
       <!-- Theme Toggle -->
       <button
         @click="toggleTheme"
@@ -166,7 +169,7 @@
       <!-- Collapse Button -->
       <button
         @click="toggleSidebar"
-        class="sidebar-link w-full"
+        class="sidebar-link hidden w-full lg:flex"
         :class="{ 'sidebar-link-collapsed': sidebarCollapsed }"
         :title="sidebarCollapsed ? t('nav.expand') : t('nav.collapse')"
       >
@@ -246,8 +249,8 @@ const onboardingStore = useOnboardingStore()
 const adminSettingsStore = useAdminSettingsStore()
 const { canUseBatchImage, refreshBatchImageAccess } = useBatchImageAccess()
 
-const sidebarCollapsed = computed(() => appStore.sidebarCollapsed)
 const mobileOpen = computed(() => appStore.mobileOpen)
+const sidebarCollapsed = computed(() => appStore.sidebarCollapsed && !mobileOpen.value)
 const isAdmin = computed(() => authStore.isAdmin)
 const sidebarNavRef = ref<HTMLElement | null>(null)
 const isDark = ref(document.documentElement.classList.contains('dark'))
@@ -877,7 +880,7 @@ function toggleTheme() {
 }
 
 function closeMobile() {
-  appStore.setMobileOpen(false)
+  if (mobileOpen.value) appStore.setMobileOpen(false)
 }
 
 function handleMenuItemClick(itemPath: string) {
@@ -948,6 +951,13 @@ if (
   isDark.value = true
   document.documentElement.classList.add('dark')
 }
+
+watch(mobileOpen, (open) => {
+  if (!open) return
+  const nav = sidebarNavRef.value
+  const firstLink = nav?.querySelector<HTMLElement>('.sidebar-link-active') ?? nav?.querySelector<HTMLElement>('.sidebar-link')
+  firstLink?.focus({ preventScroll: true })
+}, { flush: 'post' })
 
 // Fetch admin settings (for feature-gated nav items like Ops).
 watch(
@@ -1052,7 +1062,7 @@ onBeforeUnmount(() => {
   right: 0.75rem;
   top: 50%;
   height: 1px;
-  background: rgb(229 231 235);
+  background: var(--sidebar-divider);
   opacity: 0;
   transform: translateY(-50%);
   transition: opacity 0.18s ease;

@@ -2,11 +2,11 @@
   <AuthLayout>
     <div class="space-y-6">
       <!-- Title -->
-      <div class="text-center">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div>
+        <h1 class="text-3xl font-semibold tracking-tight text-ui-ink sm:text-4xl">
           {{ t('auth.createAccount') }}
-        </h2>
-        <p class="mt-2 text-sm text-gray-500 dark:text-dark-400">
+        </h1>
+        <p class="mt-2 break-words text-sm text-ui-subdued">
           {{ t('auth.signUpToStart', { siteName }) }}
         </p>
       </div>
@@ -27,7 +27,7 @@
       </div>
 
       <!-- Registration Form -->
-      <form v-else @submit.prevent="handleRegister" class="space-y-5">
+      <form v-else @submit.prevent="handleRegister" class="space-y-4">
         <!-- Email Input -->
         <div>
           <label for="email" class="input-label">
@@ -45,8 +45,9 @@
               autofocus
               autocomplete="email"
               :disabled="registrationActionDisabled"
-              class="input pl-11"
+              class="input min-h-11 pl-11"
               :class="{ 'input-error': errors.email }"
+              :aria-invalid="Boolean(errors.email)"
               :placeholder="t('auth.emailPlaceholder')"
             />
           </div>
@@ -68,15 +69,17 @@
               required
               autocomplete="new-password"
               :disabled="registrationActionDisabled"
-              class="input pl-11 pr-11"
+              class="input min-h-11 pl-11 pr-11"
               :class="{ 'input-error': errors.password }"
+              :aria-invalid="Boolean(errors.password)"
               :placeholder="t('auth.createPasswordPlaceholder')"
             />
             <button
               type="button"
               :disabled="registrationActionDisabled"
               @click="showPassword = !showPassword"
-              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+              :aria-label="t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')"
+              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-gray-500 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
             >
               <Icon v-if="showPassword" name="eyeOff" size="md" />
               <Icon v-else name="eye" size="md" />
@@ -103,15 +106,17 @@
               required
               autocomplete="new-password"
               :disabled="registrationActionDisabled"
-              class="input pl-11 pr-11"
+              class="input min-h-11 pl-11 pr-11"
               :class="{ 'input-error': errors.confirmPassword }"
+              :aria-invalid="Boolean(errors.confirmPassword)"
               :placeholder="t('auth.confirmPasswordPlaceholder')"
             />
             <button
               type="button"
               :disabled="registrationActionDisabled"
               @click="showConfirmPassword = !showConfirmPassword"
-              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+              :aria-label="t(showConfirmPassword ? 'auth.hidePassword' : 'auth.showPassword')"
+              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-gray-500 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
             >
               <Icon v-if="showConfirmPassword" name="eyeOff" size="md" />
               <Icon v-else name="eye" size="md" />
@@ -266,15 +271,19 @@
           @open="showAgreementModal = true"
         />
 
+        <p v-if="errorMessage || validationMessage" id="auth-form-error" class="auth-error" role="alert">
+          {{ errorMessage || validationMessage }}
+        </p>
+
         <!-- Submit Button -->
         <button
           type="submit"
           :disabled="registrationActionDisabled || (turnstileEnabled && !turnstileToken)"
-          class="btn btn-primary w-full"
+          class="btn btn-primary min-h-11 w-full"
         >
           <svg
             v-if="isLoading"
-            class="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+            class="-ml-1 mr-2 h-4 w-4 animate-spin"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -514,7 +523,7 @@ const errors = reactive({
   invitation_code: ''
 })
 
-const validationToastMessage = computed(() =>
+const validationMessage = computed(() =>
   errors.email ||
   errors.password ||
   errors.confirmPassword ||
@@ -542,11 +551,6 @@ const registrationActionDisabled = computed(
   () => isLoading.value || !settingsLoaded.value || agreementGateActive.value
 )
 
-watch(validationToastMessage, (value, previousValue) => {
-  if (value && value !== previousValue) {
-    appStore.showError(value)
-  }
-})
 
 function syncAffiliateReferralCode(): string {
   const code = resolveAffiliateReferralCode(route.query.aff, route.query.aff_code)
@@ -892,7 +896,6 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
       'auth.errors',
       t('auth.turnstileFailed')
     )
-    appStore.showError(errorMessage.value)
   } finally {
     resetCaptchaProof()
     isLoading.value = false
@@ -1006,7 +1009,6 @@ async function handleRegister(): Promise<void> {
   if (formData.promo_code.trim()) {
     // If promo code is being validated, wait
     if (promoValidating.value) {
-      errorMessage.value = t('auth.promoCodeValidating')
       return
     }
     // If promo code is invalid, block submission
@@ -1020,7 +1022,6 @@ async function handleRegister(): Promise<void> {
   if (invitationCodeEnabled.value) {
     // If still validating, wait
     if (invitationValidating.value) {
-      errorMessage.value = t('auth.invitationCodeValidating')
       return
     }
     // If invitation code is invalid, block submission
@@ -1030,7 +1031,6 @@ async function handleRegister(): Promise<void> {
     }
     // If invitation code is required but not validated yet
     if (formData.invitation_code.trim() && !invitationValidation.valid) {
-      errorMessage.value = t('auth.invitationCodeValidating')
       // Trigger validation
       await validateInvitationCodeDebounced(formData.invitation_code.trim())
       if (!invitationValidation.valid) {
@@ -1098,8 +1098,6 @@ async function handleRegister(): Promise<void> {
     // Handle registration error
     errorMessage.value = buildRegistrationErrorMessage(error, t('auth.registrationFailed'))
 
-    // Also show error toast
-    appStore.showError(errorMessage.value)
   } finally {
     if (captchaEnabled.value) {
       resetCaptchaProof()

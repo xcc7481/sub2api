@@ -1,25 +1,20 @@
 <template>
   <div class="card p-4">
-    <h3 class="mb-4 text-sm font-semibold text-gray-900 dark:text-white">
+    <h3 class="mb-4 text-base font-semibold tracking-tight">
       {{ t('admin.dashboard.tokenUsageTrend') }}
     </h3>
-    <div v-if="loading" class="flex h-48 items-center justify-center">
-      <LoadingSpinner />
-    </div>
-    <div v-else-if="trendData.length > 0 && chartData" class="h-48">
+    <DashboardPanelState v-if="loading" status="loading" />
+    <DashboardPanelState v-else-if="failed" status="error" retry @retry="emit('retry')" />
+    <div v-else-if="trendData.length > 0 && chartData" class="h-56">
       <Line :data="chartData" :options="lineOptions" />
     </div>
-    <div
-      v-else
-      class="flex h-48 items-center justify-center text-sm text-gray-500 dark:text-gray-400"
-    >
-      {{ t('admin.dashboard.noDataAvailable') }}
-    </div>
+    <DashboardPanelState v-else status="empty" :message="emptyMessage || t('admin.dashboard.noDataAvailable')" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { useMutationObserver, usePreferredReducedMotion } from '@vueuse/core'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   Chart as ChartJS,
@@ -33,7 +28,7 @@ import {
   Filler
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import DashboardPanelState from '@/components/common/DashboardPanelState.vue'
 import type { TrendDataPoint } from '@/types'
 
 ChartJS.register(
@@ -52,11 +47,16 @@ const { t } = useI18n()
 const props = defineProps<{
   trendData: TrendDataPoint[]
   loading?: boolean
+  failed?: boolean
+  emptyMessage?: string
 }>()
+const emit = defineEmits<{ retry: [] }>()
 
-const isDarkMode = computed(() => {
-  return document.documentElement.classList.contains('dark')
-})
+const themeRoot = document.documentElement
+const isDarkMode = ref(themeRoot.classList.contains('dark'))
+useMutationObserver(themeRoot, () => {
+  isDarkMode.value = themeRoot.classList.contains('dark')
+}, { attributes: true, attributeFilter: ['class'] })
 
 const chartColors = computed(() => ({
   text: isDarkMode.value ? '#e5e7eb' : '#374151',
@@ -123,8 +123,10 @@ const chartData = computed(() => {
   }
 })
 
+const reducedMotion = usePreferredReducedMotion()
 const lineOptions = computed(() => ({
   responsive: true,
+  animation: reducedMotion.value === 'reduce' ? false as const : undefined,
   maintainAspectRatio: false,
   interaction: {
     intersect: false,

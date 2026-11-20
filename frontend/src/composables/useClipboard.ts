@@ -16,6 +16,7 @@ function isClipboardSupported(): boolean {
  * 使用 textarea 而非 input，以正确处理多行文本
  */
 function fallbackCopy(text: string): boolean {
+  const previousFocus = document.activeElement
   const textarea = document.createElement('textarea')
   textarea.value = text
   textarea.setAttribute('readonly', 'true')
@@ -30,10 +31,11 @@ function fallbackCopy(text: string): boolean {
     return false
   } finally {
     document.body.removeChild(textarea)
+    if (previousFocus instanceof HTMLElement) previousFocus.focus({ preventScroll: true })
   }
 }
 
-export function useClipboard() {
+export function useClipboard({ notify = true } = {}) {
   const appStore = useAppStore()
   const copied = ref(false)
 
@@ -58,11 +60,11 @@ export function useClipboard() {
 
     if (success) {
       copied.value = true
-      appStore.showSuccess(successMessage || t('common.copiedToClipboard'))
+      if (notify) appStore.showSuccess(successMessage || t('common.copiedToClipboard'))
       setTimeout(() => {
         copied.value = false
       }, 2000)
-    } else {
+    } else if (notify) {
       appStore.showError(t('common.copyFailed'))
     }
 

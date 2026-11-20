@@ -1,6 +1,7 @@
 export default {
   common: {
     loading: 'Loading...',
+    skipToContent: 'Skip to main content',
     submitting: 'Submitting...',
     justNow: 'just now',
     peakRateTooltip: 'Peak rate: {window}',
@@ -238,6 +239,8 @@ export default {
     emailLabel: 'Email',
     emailPlaceholder: 'Enter your email',
     passwordLabel: 'Password',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
     passwordPlaceholder: 'Enter your password',
     createPasswordPlaceholder: 'Create a strong password',
     passwordHint: 'At least 6 characters',

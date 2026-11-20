@@ -3,6 +3,7 @@
     <button
       type="button"
       @click="toggle"
+      :aria-expanded="isOpen"
       :class="['date-picker-trigger', isOpen && 'date-picker-trigger-open']"
     >
       <span class="date-picker-icon">
@@ -21,7 +22,7 @@
     </button>
 
     <Transition name="date-picker-dropdown">
-      <div v-if="isOpen" class="date-picker-dropdown">
+      <div v-if="isOpen" ref="dropdownRef" class="date-picker-dropdown" :style="{ left: dropdownOffset + 'px' }">
         <!-- Quick presets -->
         <div class="date-picker-presets">
           <button
@@ -39,8 +40,9 @@
         <!-- Custom date range inputs -->
         <div class="date-picker-custom">
           <div class="date-picker-field">
-            <label class="date-picker-label">{{ t('dates.startDate') }}</label>
+            <label :for="dateInputId + '-start'" class="date-picker-label">{{ t('dates.startDate') }}</label>
             <input
+              :id="dateInputId + '-start'"
               type="date"
               v-model="localStartDate"
               :max="localEndDate || tomorrow()"
@@ -52,8 +54,9 @@
             <Icon name="arrowRight" size="sm" class="text-gray-400" />
           </div>
           <div class="date-picker-field">
-            <label class="date-picker-label">{{ t('dates.endDate') }}</label>
+            <label :for="dateInputId + '-end'" class="date-picker-label">{{ t('dates.endDate') }}</label>
             <input
+              :id="dateInputId + '-end'"
               type="date"
               v-model="localEndDate"
               :min="localStartDate"
@@ -76,7 +79,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 
@@ -101,9 +104,12 @@ const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
 const { t, locale } = useI18n()
+const dateInputId = useId()
 
 const isOpen = ref(false)
 const containerRef = ref<HTMLElement | null>(null)
+const dropdownRef = ref<HTMLElement | null>(null)
+const dropdownOffset = ref(0)
 const localStartDate = ref(props.startDate)
 const localEndDate = ref(props.endDate)
 const activePreset = ref<string | null>('last24Hours')
@@ -260,6 +266,15 @@ const toggle = () => {
   isOpen.value = !isOpen.value
 }
 
+function positionDropdown() {
+  if (!isOpen.value || !containerRef.value || !dropdownRef.value) return
+
+  const gutter = 16
+  const anchorLeft = containerRef.value.getBoundingClientRect().left
+  const maxLeft = document.documentElement.clientWidth - dropdownRef.value.offsetWidth - gutter
+  dropdownOffset.value = Math.max(gutter, Math.min(anchorLeft, maxLeft)) - anchorLeft
+}
+
 const apply = () => {
   emit('update:startDate', localStartDate.value)
   emit('update:endDate', localEndDate.value)
@@ -285,7 +300,10 @@ const handleEscape = (event: KeyboardEvent) => {
 
 // Restore the applied range after dismissal, including parent updates from Apply.
 watch(isOpen, (open) => {
-  if (open) return
+  if (open) {
+    positionDropdown()
+    return
+  }
   localStartDate.value = props.startDate
   localEndDate.value = props.endDate
   onDateChange()
@@ -311,6 +329,7 @@ watch(
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
   document.addEventListener('keydown', handleEscape)
+  window.addEventListener('resize', positionDropdown)
   // Initialize active preset detection
   onDateChange()
 })
@@ -318,6 +337,7 @@ onMounted(() => {
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   document.removeEventListener('keydown', handleEscape)
+  window.removeEventListener('resize', positionDropdown)
 })
 </script>
 
@@ -325,12 +345,12 @@ onUnmounted(() => {
 .date-picker-trigger {
   @apply flex items-center gap-2;
   @apply rounded-lg px-3 py-2 text-sm;
-  @apply bg-white dark:bg-dark-800;
-  @apply border border-gray-200 dark:border-dark-600;
-  @apply text-gray-700 dark:text-gray-300;
-  @apply transition-all duration-200;
-  @apply focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30;
-  @apply hover:border-gray-300 dark:hover:border-dark-500;
+  @apply bg-ui-surface;
+  @apply border border-ui-control;
+  @apply text-ui-ink;
+  @apply transition-colors duration-150 motion-reduce:transition-none;
+  @apply focus:border-ui-focus;
+  @apply hover:border-ui-focus;
   @apply cursor-pointer;
 }
 
@@ -351,13 +371,13 @@ onUnmounted(() => {
 }
 
 .date-picker-dropdown {
-  @apply absolute left-0 z-[100] mt-2;
-  @apply bg-white dark:bg-dark-800;
+  @apply absolute z-[100] mt-2;
+  @apply bg-ui-surface;
   @apply rounded-xl;
   @apply border border-gray-200 dark:border-dark-700;
   @apply shadow-lg shadow-black/10 dark:shadow-black/30;
   @apply overflow-hidden;
-  @apply min-w-[320px];
+  width: min(20rem, calc(100vw - 2rem));
 }
 
 .date-picker-presets {
@@ -385,7 +405,7 @@ onUnmounted(() => {
 }
 
 .date-picker-field {
-  @apply flex-1;
+  @apply min-w-0 flex-1;
 }
 
 .date-picker-label {
@@ -393,11 +413,11 @@ onUnmounted(() => {
 }
 
 .date-picker-input {
-  @apply w-full rounded-md px-2 py-1.5 text-sm;
+  @apply w-full min-w-0 rounded-md px-2 py-1.5 text-sm;
   @apply bg-gray-50 dark:bg-dark-700;
   @apply border border-gray-200 dark:border-dark-600;
   @apply text-gray-900 dark:text-gray-100;
-  @apply focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/30;
+  @apply focus:border-ui-focus focus-visible:outline-offset-0;
 }
 
 .date-picker-input::-webkit-calendar-picker-indicator {
@@ -421,18 +441,23 @@ onUnmounted(() => {
   @apply rounded-lg px-4 py-1.5 text-sm font-medium;
   @apply bg-primary-600 text-white;
   @apply hover:bg-primary-700;
+  @apply dark:bg-primary-400 dark:text-gray-950 dark:hover:bg-primary-300;
   @apply transition-colors duration-150;
 }
 
 /* Dropdown animation */
-.date-picker-dropdown-enter-active,
-.date-picker-dropdown-leave-active {
-  transition: all 0.2s ease;
+.date-picker-dropdown-enter-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.date-picker-dropdown-enter-from,
-.date-picker-dropdown-leave-to {
+.date-picker-dropdown-enter-from {
   opacity: 0;
   transform: translateY(-8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .date-picker-dropdown-enter-active {
+    transition: none;
+  }
 }
 </style>

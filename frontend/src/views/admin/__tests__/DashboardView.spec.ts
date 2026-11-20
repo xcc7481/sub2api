@@ -143,6 +143,32 @@ describe('admin DashboardView', () => {
     expect(chart.props('data').datasets[0].data).toEqual([5])
   })
 
+  it('keeps overview metrics visible when charts fail and retries the selected range', async () => {
+    const wrapper = mount(DashboardView, {
+      global: { stubs: {
+        AppLayout: { template: '<div><slot /></div>' }, LoadingSpinner: true,
+        Icon: true, DateRangePicker: true, Select: true, ModelDistributionChart: true
+      } }
+    })
+    await flushPromises()
+    expect(wrapper.get('.dashboard-charts').text()).toContain('dashboard.noUsageForPeriod')
+
+    getSnapshotV2.mockRejectedValueOnce(new Error('Failed request'))
+    await wrapper.get('.dashboard-toolbar button').trigger('click')
+    await flushPromises()
+    expect(wrapper.find('.dashboard-overview').exists()).toBe(true)
+    expect(wrapper.get('.dashboard-charts [role="alert"]').text()).toBe('dashboard.failedToLoadCharts')
+
+    await wrapper.get('.dashboard-charts button').trigger('click')
+    await flushPromises()
+    expect(getSnapshotV2).toHaveBeenLastCalledWith(expect.objectContaining({
+      granularity: 'hour',
+      include_stats: false
+    }))
+    expect(wrapper.get('.dashboard-charts').text()).toContain('dashboard.noUsageForPeriod')
+    expect(wrapper.find('.dashboard-charts [role="alert"]').exists()).toBe(false)
+  })
+
   it('uses last 24 hours as default dashboard range', async () => {
     mount(DashboardView, {
       global: {

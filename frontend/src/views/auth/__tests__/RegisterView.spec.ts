@@ -154,7 +154,7 @@ describe('RegisterView', () => {
     await wrapper.get('form').trigger('submit.prevent')
     await flushPromises()
 
-    expect(showErrorMock).toHaveBeenCalledWith(error)
+    expect(wrapper.get('#auth-form-error').text()).toBe(error)
     expect(wrapper.get('#confirmPassword').classes()).toContain('input-error')
     expect(registerMock).not.toHaveBeenCalled()
     expect(verifyActionMock).not.toHaveBeenCalled()
@@ -278,7 +278,7 @@ describe('RegisterView', () => {
     await wrapper.get('form').trigger('submit.prevent')
     await flushPromises()
 
-    expect(showErrorMock).toHaveBeenCalledWith(
+    expect(wrapper.get('#auth-form-error').text()).toBe(
       '该邮箱域名无法注册新账户。请使用主流邮箱注册；如需使用企业邮箱，请联系客服添加域名白名单。'
     )
   })
@@ -300,8 +300,7 @@ describe('RegisterView', () => {
     await flushPromises()
 
     expect(registerMock).not.toHaveBeenCalled()
-    // 校验失败通过 validationToastMessage watcher 弹 toast
-    expect(showErrorMock).toHaveBeenCalledWith('auth.emailSuffixNotAllowedWithAllowed')
+    expect(wrapper.get('#auth-form-error').text()).toBe('auth.emailSuffixNotAllowedWithAllowed')
     expect(wrapper.get('#email').classes()).toContain('input-error')
   })
 

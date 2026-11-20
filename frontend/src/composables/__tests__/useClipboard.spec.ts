@@ -85,6 +85,18 @@ describe('useClipboard', () => {
     expect(mockShowSuccess).toHaveBeenCalledWith('common.copiedToClipboard')
   })
 
+  it('允许调用方在页面内呈现复制反馈', async () => {
+    const { copied, copyToClipboard } = useClipboard({ notify: false })
+
+    expect(await copyToClipboard('hello')).toBe(true)
+    expect(copied.value).toBe(true)
+    expect(mockShowSuccess).not.toHaveBeenCalled()
+
+    vi.mocked(navigator.clipboard.writeText).mockRejectedValue(new Error('Unavailable'))
+    expect(await copyToClipboard('hello')).toBe(false)
+    expect(mockShowError).not.toHaveBeenCalled()
+  })
+
   it('空文本返回 false 且不复制', async () => {
     const { copyToClipboard, copied } = useClipboard()
 

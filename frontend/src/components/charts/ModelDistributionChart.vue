@@ -1,7 +1,7 @@
 <template>
   <div class="card p-4">
-    <div class="mb-4 flex items-center justify-between gap-3">
-      <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h3 class="text-base font-semibold tracking-tight">
         {{ !enableRankingView || activeView === 'model_distribution'
           ? t('admin.dashboard.modelDistribution')
           : t('admin.dashboard.spendingRankingTitle') }}
@@ -96,9 +96,13 @@
       </div>
     </div>
 
-    <div v-if="activeView === 'model_distribution' && loading" class="flex h-48 items-center justify-center">
-      <LoadingSpinner />
-    </div>
+    <DashboardPanelState v-if="activeView === 'model_distribution' && loading" status="loading" />
+    <DashboardPanelState
+      v-else-if="activeView === 'model_distribution' && failed"
+      status="error"
+      retry
+      @retry="emit('retry')"
+    />
     <div
       v-else-if="activeView === 'model_distribution' && displayModelStats.length > 0 && chartData"
       class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6"
@@ -168,20 +172,13 @@
     </div>
     <div
       v-else-if="activeView === 'model_distribution'"
-      class="flex h-48 items-center justify-center text-sm text-gray-500 dark:text-gray-400"
+      class="dashboard-state"
     >
-      {{ t('admin.dashboard.noDataAvailable') }}
+      {{ emptyMessage || t('admin.dashboard.noDataAvailable') }}
     </div>
 
-    <div v-else-if="rankingLoading" class="flex h-48 items-center justify-center">
-      <LoadingSpinner />
-    </div>
-    <div
-      v-else-if="rankingError"
-      class="flex h-48 items-center justify-center text-sm text-gray-500 dark:text-gray-400"
-    >
-      {{ t('admin.dashboard.failedToLoad') }}
-    </div>
+    <DashboardPanelState v-else-if="rankingLoading" status="loading" />
+    <DashboardPanelState v-else-if="rankingError" status="error" retry @retry="emit('retryRanking')" />
     <div v-else-if="rankingDisplayItems.length > 0 && rankingChartData" class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
       <div class="h-48 w-48 shrink-0">
         <Doughnut :data="rankingChartData" :options="rankingDoughnutOptions" />
@@ -235,7 +232,7 @@
     </div>
     <div
       v-else
-      class="flex h-48 items-center justify-center text-sm text-gray-500 dark:text-gray-400"
+      class="dashboard-state"
     >
       {{ t('admin.dashboard.noDataAvailable') }}
     </div>
@@ -243,11 +240,12 @@
 </template>
 
 <script setup lang="ts">
+import { usePreferredReducedMotion } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import DashboardPanelState from '@/components/common/DashboardPanelState.vue'
 import UserBreakdownSubTable from './UserBreakdownSubTable.vue'
 import type { ModelStat, UserSpendingRankingItem, UserBreakdownItem } from '@/types'
 import { getUserBreakdown } from '@/api/admin/dashboard'
@@ -277,6 +275,8 @@ const props = withDefaults(defineProps<{
   showAccountCost?: boolean
   rankingLoading?: boolean
   rankingError?: boolean
+  failed?: boolean
+  emptyMessage?: string
   startDate?: string
   endDate?: string
   filters?: Record<string, any>
@@ -332,6 +332,8 @@ const emit = defineEmits<{
   'update:metric': [value: DistributionMetric]
   'update:source': [value: ModelSource]
   'ranking-click': [item: UserSpendingRankingItem]
+  retry: []
+  retryRanking: []
 }>()
 
 const enableRankingView = computed(() => props.enableRankingView)
@@ -437,8 +439,10 @@ const rankingDisplayItems = computed<RankingDisplayItem[]>(() => {
     : [...props.rankingItems]
 })
 
+const reducedMotion = usePreferredReducedMotion()
 const doughnutOptions = computed(() => ({
   responsive: true,
+  animation: reducedMotion.value === 'reduce' ? false as const : undefined,
   maintainAspectRatio: false,
   plugins: {
     legend: {
@@ -462,6 +466,7 @@ const doughnutOptions = computed(() => ({
 
 const rankingDoughnutOptions = computed(() => ({
   responsive: true,
+  animation: reducedMotion.value === 'reduce' ? false as const : undefined,
   maintainAspectRatio: false,
   plugins: {
     legend: {

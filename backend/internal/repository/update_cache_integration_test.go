@@ -27,6 +27,19 @@ func (s *UpdateCacheSuite) TestGetUpdateInfo_Missing() {
 	require.True(s.T(), errors.Is(err, redis.Nil), "expected redis.Nil for missing update info")
 }
 
+func (s *UpdateCacheSuite) TestGetUpdateInfo_IgnoresLegacyCache() {
+	const legacyKey = "update:latest"
+	require.NoError(s.T(), s.rdb.Set(s.ctx, legacyKey, "upstream", time.Minute).Err())
+
+	_, err := s.cache.GetUpdateInfo(s.ctx)
+	require.ErrorIs(s.T(), err, redis.Nil)
+
+	require.NoError(s.T(), s.cache.SetUpdateInfo(s.ctx, "fork", time.Minute))
+	legacy, err := s.rdb.Get(s.ctx, legacyKey).Result()
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), "upstream", legacy)
+}
+
 func (s *UpdateCacheSuite) TestSetAndGetUpdateInfo() {
 	updateTTL := 5 * time.Minute
 	require.NoError(s.T(), s.cache.SetUpdateInfo(s.ctx, "v1.2.3", updateTTL), "SetUpdateInfo")

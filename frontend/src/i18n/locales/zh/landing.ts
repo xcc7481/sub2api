@@ -14,9 +14,13 @@ export default {
     login: '登录',
     getStarted: '立即开始',
     goToDashboard: '进入控制台',
+    apiExample: 'API 请求示例',
+    copyRequest: '复制请求体',
+    gatewayTitle: '一个 API',
+    gatewayTitleAccent: '接入多种模型',
     // 新增：面向用户的价值主张
     heroSubtitle: '一个密钥，畅用多个 AI 模型',
-    heroDescription: '无需管理多个订阅账号，一站式接入 Claude、GPT、Gemini 等主流 AI 服务',
+    heroDescription: '用同一个网关调用 Claude、GPT、Gemini 等模型，集中管理 API 密钥、用量和额度。',
     tags: {
       subscriptionToApi: '订阅转 API',
       stickySession: '会话保持',
@@ -50,6 +54,7 @@ export default {
       subtitle: '简单三步，开始省心使用 AI'
     },
     features: {
+      title: '网关功能',
       unifiedGateway: '一键接入',
       unifiedGatewayDesc: '获取一个 API 密钥，即可调用所有已接入的 AI 模型，无需分别申请。',
       multiAccount: '稳定可靠',
@@ -99,6 +104,7 @@ export default {
       supported: '已支持',
       soon: '即将推出',
       claude: 'Claude',
+      gpt: 'GPT',
       gemini: 'Gemini',
       antigravity: 'Antigravity',
       more: '更多'
