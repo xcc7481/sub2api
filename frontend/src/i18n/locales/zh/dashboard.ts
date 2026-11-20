@@ -1,5 +1,10 @@
 export default {
   dashboard: {
+    failedToLoadOverview: '暂时无法加载用量概览，请重试。',
+    overviewMetrics: '关键指标',
+    noUsageForPeriod: '所选时段暂无用量。',
+    failedToLoadCharts: '用量数据暂时无法加载。',
+    failedToLoadRecent: '最近用量暂时无法加载。',
     title: '仪表盘',
     welcomeMessage: '欢迎回来！这是您账户的概览。',
     balance: '余额',

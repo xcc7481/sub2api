@@ -1,6 +1,7 @@
 export default {
   common: {
     loading: '加载中...',
+    skipToContent: '跳到主要内容',
     submitting: '提交中...',
     justNow: '刚刚',
     peakRateTooltip: '高峰倍率：{window}',
@@ -238,6 +239,8 @@ export default {
     emailLabel: '邮箱',
     emailPlaceholder: '请输入邮箱',
     passwordLabel: '密码',
+    showPassword: '显示密码',
+    hidePassword: '隐藏密码',
     passwordPlaceholder: '请输入密码',
     createPasswordPlaceholder: '创建一个安全的密码',
     passwordHint: '至少 6 个字符',

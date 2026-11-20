@@ -41,7 +41,7 @@ export default {
       metricTokens: '按 Token',
       metricActualCost: '按实际消费',
       tokenUsageTrend: 'Token 使用趋势',
-      userUsageTrend: '用户使用趋势（Top 12）',
+      userUsageTrend: '用户使用趋势（前 12 名）',
       noDataAvailable: '暂无数据',
       model: '模型',
       group: '分组',

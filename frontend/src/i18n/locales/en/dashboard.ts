@@ -1,5 +1,10 @@
 export default {
   dashboard: {
+    failedToLoadOverview: 'Unable to load the usage overview. Please try again.',
+    overviewMetrics: 'Key metrics',
+    noUsageForPeriod: 'No usage for this period.',
+    failedToLoadCharts: 'Usage data is temporarily unavailable.',
+    failedToLoadRecent: 'Recent usage is temporarily unavailable.',
     title: 'Dashboard',
     welcomeMessage: "Welcome back! Here's an overview of your account.",
     balance: 'Balance',

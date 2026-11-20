@@ -2,16 +2,16 @@
   <AuthLayout>
     <div class="space-y-6">
       <!-- Title -->
-      <div class="text-center">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div>
+        <h1 class="text-3xl font-semibold tracking-tight text-ui-ink sm:text-4xl">
           {{ t('auth.welcomeBack') }}
-        </h2>
-        <p class="mt-2 text-sm text-gray-500 dark:text-dark-400">
+        </h1>
+        <p class="mt-2 break-words text-sm text-ui-subdued">
           {{ t('auth.signInToAccount') }}
         </p>
       </div>
       <!-- Login Form -->
-      <form @submit.prevent="handleLogin" class="space-y-5">
+      <form @submit.prevent="handleLogin" class="space-y-4">
         <!-- Email Input -->
         <div>
           <label for="email" class="input-label">
@@ -29,8 +29,9 @@
               autofocus
               autocomplete="email"
               :disabled="authActionDisabled"
-              class="input pl-11"
+              class="input min-h-11 pl-11"
               :class="{ 'input-error': errors.email }"
+              :aria-invalid="Boolean(errors.email)"
               :placeholder="t('auth.emailPlaceholder')"
             />
           </div>
@@ -52,15 +53,17 @@
               required
               autocomplete="current-password"
               :disabled="authActionDisabled"
-              class="input pl-11 pr-11"
+              class="input min-h-11 pl-11 pr-11"
               :class="{ 'input-error': errors.password }"
+              :aria-invalid="Boolean(errors.password)"
               :placeholder="t('auth.passwordPlaceholder')"
             />
             <button
               type="button"
               @click="showPassword = !showPassword"
+              :aria-label="t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')"
               :disabled="authActionDisabled"
-              class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-gray-500 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
             >
               <Icon v-if="showPassword" name="eyeOff" size="md" />
               <Icon v-else name="eye" size="md" />
@@ -97,15 +100,19 @@
           />
         </div>
 
+        <p v-if="errorMessage || validationMessage" id="auth-form-error" class="auth-error" role="alert">
+          {{ errorMessage || validationMessage }}
+        </p>
+
         <!-- Submit Button -->
         <button
           type="submit"
           :disabled="authActionDisabled || (turnstileEnabled && !turnstileToken)"
-          class="btn btn-primary w-full"
+          class="btn btn-primary min-h-11 w-full"
         >
           <svg
             v-if="isLoading"
-            class="-ml-1 mr-2 h-4 w-4 animate-spin text-white"
+            class="-ml-1 mr-2 h-4 w-4 animate-spin"
             fill="none"
             viewBox="0 0 24 24"
           >
@@ -222,7 +229,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive, onMounted, watch } from 'vue'
+import { computed, ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { AuthLayout } from '@/components/layout'
@@ -336,7 +343,7 @@ const errors = reactive({
   turnstile: ''
 })
 
-const validationToastMessage = computed(
+const validationMessage = computed(
   () => errors.email || errors.password || errors.turnstile || ''
 )
 
@@ -363,11 +370,6 @@ const showOAuthLogin = computed(
       googleOAuthEnabled.value)
 )
 
-watch(validationToastMessage, (value, previousValue) => {
-  if (value && value !== previousValue) {
-    appStore.showError(value)
-  }
-})
 
 // ==================== Lifecycle ====================
 
@@ -377,7 +379,6 @@ onMounted(async () => {
     sessionStorage.removeItem('auth_expired')
     const message = t('auth.reloginRequired')
     errorMessage.value = message
-    appStore.showWarning(message)
   }
 
   try {
@@ -608,8 +609,6 @@ async function handleLogin(): Promise<void> {
   } catch (error: unknown) {
     errorMessage.value = extractI18nErrorMessage(error, t, 'auth.errors', t('auth.loginFailed'))
 
-    // Also show error toast
-    appStore.showError(errorMessage.value)
   } finally {
     if (captchaEnabled.value) {
       resetCaptchaProof()
@@ -651,7 +650,6 @@ async function handlePasskeyLogin(): Promise<void> {
       ? t('auth.passkeyCancelled')
       : t('auth.passkeyFailed')
     errorMessage.value = extractI18nErrorMessage(error, t, 'auth.errors', fallback)
-    appStore.showError(errorMessage.value)
   } finally {
     if (actionCaptchaEnabled.value) {
       resetCaptchaProof()
@@ -690,7 +688,6 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
       'auth.errors',
       t('auth.turnstileFailed')
     )
-    appStore.showError(errorMessage.value)
   } finally {
     resetCaptchaProof()
     isLoading.value = false

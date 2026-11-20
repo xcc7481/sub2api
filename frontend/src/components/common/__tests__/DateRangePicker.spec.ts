@@ -34,6 +34,32 @@ const formatLocalDate = (date: Date): string => {
 }
 
 describe('DateRangePicker', () => {
+  it('keeps the popup inside a narrow viewport and realigns on resize', async () => {
+    const wrapper = mount(DateRangePicker, {
+      props: { startDate: '2026-11-01', endDate: '2026-11-07' },
+      global: { stubs: { Icon: true } }
+    })
+    const viewport = vi.spyOn(Element.prototype, 'clientWidth', 'get').mockReturnValue(320)
+    const width = vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(288)
+    const bounds = vi.spyOn(wrapper.element, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 0, 160, 40))
+
+    try {
+      await wrapper.get('.date-picker-trigger').trigger('click')
+      const popup = wrapper.get<HTMLElement>('.date-picker-dropdown')
+      expect(popup.element.style.left).toBe('-84px')
+
+      viewport.mockReturnValue(500)
+      window.dispatchEvent(new Event('resize'))
+      await wrapper.vm.$nextTick()
+      expect(popup.element.style.left).toBe('0px')
+    } finally {
+      wrapper.unmount()
+      bounds.mockRestore()
+      width.mockRestore()
+      viewport.mockRestore()
+    }
+  })
+
   it('uses last 24 hours as the default recognized preset', () => {
     const now = new Date()
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)

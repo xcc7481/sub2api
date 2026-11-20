@@ -14,9 +14,13 @@ export default {
     login: 'Login',
     getStarted: 'Get Started',
     goToDashboard: 'Go to Dashboard',
+    apiExample: 'API request example',
+    copyRequest: 'Copy request body',
+    gatewayTitle: 'One API.',
+    gatewayTitleAccent: 'Many models.',
     // User-focused value proposition
     heroSubtitle: 'One Key, All AI Models',
-    heroDescription: 'No need to manage multiple subscriptions. Access Claude, GPT, Gemini and more with a single API key',
+    heroDescription: 'Call Claude, GPT, Gemini, and more through one gateway. Manage API keys, usage, and quotas in one place.',
     tags: {
       subscriptionToApi: 'Subscription to API',
       stickySession: 'Session Persistence',
@@ -50,6 +54,7 @@ export default {
       subtitle: 'Three simple steps to stress-free AI access'
     },
     features: {
+      title: 'Gateway features',
       unifiedGateway: 'One-Click Access',
       unifiedGatewayDesc: 'Get a single API key to call all connected AI models. No separate applications needed.',
       multiAccount: 'Always Reliable',
@@ -99,6 +104,7 @@ export default {
       supported: 'Supported',
       soon: 'Soon',
       claude: 'Claude',
+      gpt: 'GPT',
       gemini: 'Gemini',
       antigravity: 'Antigravity',
       more: 'More'

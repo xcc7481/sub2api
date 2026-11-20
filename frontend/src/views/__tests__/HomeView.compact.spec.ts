@@ -108,7 +108,10 @@ describe('HomeView compact mode', () => {
     const wrapper = mountHome(settings)
 
     expect(wrapper.find('[data-testid="compact-home"]').exists()).toBe(false)
-    expect(wrapper.find('.terminal-container').exists()).toBe(true)
+    expect(wrapper.get('figure figcaption').text()).toBe('home.apiExample')
+    expect(wrapper.get('figure').text()).toContain('/v1/messages')
+    expect(wrapper.get('footer').text()).toContain('home.footer.allRightsReserved')
+    expect(wrapper.get('footer').find('a').exists()).toBe(false)
   })
 
   it('links unauthenticated visitors to login', () => {
