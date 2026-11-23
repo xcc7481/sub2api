@@ -132,10 +132,10 @@
   </section>
 
   <!-- Row 3: Per-platform breakdown -->
-  <div v-if="!isSimple && platformCards.length > 0" class="card p-4">
-    <div class="mb-3 flex items-center justify-between">
-      <h3 class="text-sm font-semibold text-gray-900 dark:text-white">{{ t('dashboard.platformBreakdown') }}</h3>
-      <span class="text-xs text-gray-500 dark:text-gray-400">
+  <div v-if="!isSimple && platformCards.length > 0" class="card p-5">
+    <div class="mb-3.5 flex items-center justify-between gap-2">
+      <h3 class="text-sm font-semibold tracking-tight text-ui-ink">{{ t('dashboard.platformBreakdown') }}</h3>
+      <span class="badge badge-gray">
         {{ t('dashboard.platformCount', { count: platformCount }) }}
       </span>
     </div>
@@ -146,72 +146,73 @@
         data-testid="platform-card"
         :data-platform="item.platform"
         :class="[
-          'rounded-lg border p-3',
+          'rounded-lg border p-3.5 transition-colors',
           item.isOther
-            ? 'border-dashed border-gray-300 bg-gray-50 dark:border-dark-500 dark:bg-dark-700/30'
-            : 'border-gray-200 dark:border-dark-600'
+            ? 'border-dashed border-ui-control bg-ui-canvas/70'
+            : 'border-ui-line bg-ui-canvas/45 hover:border-ui-control-hover'
         ]"
       >
-        <div class="flex items-center justify-between">
-          <span class="text-sm font-semibold text-gray-900 dark:text-white">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-sm font-semibold text-ui-ink">
             {{ item.isOther ? t('dashboard.platformOther') : platformLabel(item.platform) }}
           </span>
-          <span class="font-mono text-sm text-ui-action" :title="t('dashboard.actual')">
+          <span class="font-mono text-sm font-semibold tabular-nums text-ui-action" :title="t('dashboard.actual')">
             ${{ formatCost(item.total_actual_cost) }}
           </span>
         </div>
-        <div class="mt-2 space-y-1 text-xs">
+        <div class="mt-2.5 space-y-1.5 text-xs tabular-nums">
           <div class="flex items-center justify-between">
-            <span class="text-gray-500 dark:text-gray-400">{{ t('dashboard.todayCost') }}</span>
-            <span class="font-mono text-gray-900 dark:text-white">${{ formatCost(item.today_actual_cost) }}</span>
+            <span class="text-ui-subdued">{{ t('dashboard.todayCost') }}</span>
+            <span class="font-mono font-medium text-ui-ink">${{ formatCost(item.today_actual_cost) }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-gray-500 dark:text-gray-400">{{ t('dashboard.requests') }}</span>
-            <span class="font-mono text-gray-700 dark:text-gray-300">
+            <span class="text-ui-subdued">{{ t('dashboard.requests') }}</span>
+            <span class="font-mono text-ui-ink/85">
               {{ item.total_requests > 0 ? formatNumber(item.total_requests) : '-' }}
             </span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-gray-500 dark:text-gray-400">{{ t('dashboard.tokens') }}</span>
-            <span class="font-mono text-gray-700 dark:text-gray-300">
+            <span class="text-ui-subdued">{{ t('dashboard.tokens') }}</span>
+            <span class="font-mono text-ui-ink/85">
               {{ item.total_tokens > 0 ? formatTokens(item.total_tokens) : '-' }}
             </span>
           </div>
         </div>
 
         <!-- Quota 区：仅当 quota 配置存在、非 __other__ 且至少有一个窗口配了 limit 时显示 -->
-        <div v-if="hasAnyLimit(item.quota) && !item.isOther" class="mt-3 space-y-1.5 border-t border-gray-200 pt-2 dark:border-dark-700">
-          <p class="text-[10px] uppercase tracking-wide text-gray-400">
+        <div v-if="hasAnyLimit(item.quota) && !item.isOther" class="mt-3 space-y-2 border-t border-ui-line pt-2.5">
+          <p class="text-[10px] font-semibold uppercase tracking-[0.07em] text-ui-subdued">
             {{ t('dashboard.platformQuota.title') }}
           </p>
           <template v-for="w in (['daily', 'weekly', 'monthly'] as const)" :key="w">
-            <div v-if="quotaVal(item.quota, `${w}_limit_usd`) != null" class="space-y-0.5">
+            <div v-if="quotaVal(item.quota, `${w}_limit_usd`) != null" class="space-y-1">
               <!-- limit=0：完全禁用 -->
               <template v-if="(quotaVal(item.quota, `${w}_limit_usd`) as number) === 0">
                 <div class="flex items-center justify-between text-xs">
-                  <span class="text-gray-600 dark:text-gray-300">{{ t(`dashboard.platformQuota.${w}`) }}</span>
-                  <span class="font-mono text-red-500">{{ t('dashboard.platformQuota.disabled') }}</span>
+                  <span class="text-ui-subdued">{{ t(`dashboard.platformQuota.${w}`) }}</span>
+                  <span class="font-mono font-medium text-red-700 dark:text-red-400">{{ t('dashboard.platformQuota.disabled') }}</span>
                 </div>
-                <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-dark-700">
-                  <div class="h-full w-full rounded-full bg-red-500" />
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-ui-muted">
+                  <div class="h-full w-full rounded-full bg-red-600 dark:bg-red-400" />
                 </div>
               </template>
               <!-- limit>0：正常用量进度条 -->
               <template v-else>
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-gray-600 dark:text-gray-300">{{ t(`dashboard.platformQuota.${w}`) }}</span>
-                  <span class="font-mono text-gray-700 dark:text-gray-200">
+                <div class="flex items-center justify-between gap-2 text-xs tabular-nums">
+                  <span class="text-ui-subdued">{{ t(`dashboard.platformQuota.${w}`) }}</span>
+                  <span class="font-mono text-ui-ink">
                     ${{ formatUsd((quotaVal(item.quota, `${w}_usage_usd`) as number) ?? 0) }} / ${{ formatUsd(quotaVal(item.quota, `${w}_limit_usd`) as number) }}
+                    <span class="text-[10px] text-ui-subdued">({{ calcPercent((quotaVal(item.quota, `${w}_usage_usd`) as number) ?? 0, quotaVal(item.quota, `${w}_limit_usd`) as number) }}%)</span>
                   </span>
                 </div>
-                <div class="h-1.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-dark-700">
+                <div class="h-1.5 w-full overflow-hidden rounded-full bg-ui-muted">
                   <div
                     class="h-full rounded-full transition-all"
                     :class="quotaBarClass(calcPercent((quotaVal(item.quota, `${w}_usage_usd`) as number) ?? 0, quotaVal(item.quota, `${w}_limit_usd`) as number))"
                     :style="{ width: calcPercent((quotaVal(item.quota, `${w}_usage_usd`) as number) ?? 0, quotaVal(item.quota, `${w}_limit_usd`) as number) + '%' }"
                   />
                 </div>
-                <p v-if="quotaVal(item.quota, `${w}_window_resets_at`)" class="text-[10px] text-gray-400">
+                <p v-if="quotaVal(item.quota, `${w}_window_resets_at`)" class="text-[10px] text-ui-subdued">
                   {{ t('dashboard.platformQuota.resetsAt', { time: formatResetTime(quotaVal(item.quota, `${w}_window_resets_at`) as string) }) }}
                 </p>
               </template>

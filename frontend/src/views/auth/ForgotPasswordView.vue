@@ -2,27 +2,27 @@
   <AuthLayout>
     <div class="space-y-6">
       <!-- Title -->
-      <div class="text-center">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight text-ui-ink sm:text-[1.75rem]">
           {{ t('auth.forgotPasswordTitle') }}
-        </h2>
-        <p class="mt-2 text-sm text-gray-500 dark:text-dark-400">
+        </h1>
+        <p class="mt-1.5 break-words text-sm text-ui-subdued">
           {{ t('auth.forgotPasswordHint') }}
         </p>
       </div>
 
       <!-- Success State -->
       <div v-if="isSubmitted" class="space-y-6">
-        <div class="rounded-xl border border-green-200 bg-green-50 p-6 dark:border-green-800/50 dark:bg-green-900/20">
-          <div class="flex flex-col items-center gap-4 text-center">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-800/50">
-              <Icon name="checkCircle" size="lg" class="text-green-600 dark:text-green-400" />
+        <div class="rounded-lg border border-emerald-200 bg-emerald-50/90 p-5 dark:border-emerald-800/50 dark:bg-emerald-950/35">
+          <div class="flex flex-col items-center gap-3 text-center">
+            <div class="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+              <Icon name="checkCircle" size="md" class="text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
             </div>
             <div>
-              <h3 class="text-lg font-semibold text-green-800 dark:text-green-200">
+              <h2 class="text-base font-semibold text-emerald-900 dark:text-emerald-200">
                 {{ t('auth.resetEmailSent') }}
-              </h3>
-              <p class="mt-2 text-sm text-green-700 dark:text-green-300">
+              </h2>
+              <p class="mt-1.5 text-sm text-emerald-800 dark:text-emerald-300">
                 {{ t('auth.resetEmailSentHint') }}
               </p>
             </div>
@@ -32,16 +32,16 @@
         <div class="text-center">
           <router-link
             to="/login"
-            class="inline-flex items-center gap-2 font-medium text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+            class="inline-flex items-center gap-2 text-sm font-medium text-ui-action transition-colors hover:text-ui-action-hover"
           >
-            <Icon name="arrowLeft" size="sm" />
+            <Icon name="arrowLeft" size="sm" aria-hidden="true" />
             {{ t('auth.backToLogin') }}
           </router-link>
         </div>
       </div>
 
       <!-- Form State -->
-      <form v-else @submit.prevent="handleSubmit" class="space-y-5">
+      <form v-else @submit.prevent="handleSubmit" class="space-y-4">
         <!-- Email Input -->
         <div>
           <label for="email" class="input-label">
@@ -49,7 +49,7 @@
           </label>
           <div class="relative">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="mail" size="md" class="text-gray-400 dark:text-dark-500" />
+              <Icon name="mail" size="sm" class="text-ui-subdued" aria-hidden="true" />
             </div>
             <input
               id="email"
@@ -59,8 +59,9 @@
               autofocus
               autocomplete="email"
               :disabled="isLoading"
-              class="input pl-11"
+              class="input min-h-11 pl-10"
               :class="{ 'input-error': errors.email }"
+              :aria-invalid="Boolean(errors.email)"
               :placeholder="t('auth.emailPlaceholder')"
             />
           </div>

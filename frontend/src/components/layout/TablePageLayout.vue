@@ -76,7 +76,7 @@ onUnmounted(() => {
 }
 
 .table-scroll-container :deep(thead) {
-  @apply bg-ui-muted;
+  @apply bg-ui-muted/80;
 }
 
 .table-scroll-container :deep(tbody) {
@@ -84,11 +84,11 @@ onUnmounted(() => {
 }
 
 .table-scroll-container :deep(th) {
-  @apply border-b border-ui-line px-5 py-4 text-left text-sm font-semibold text-gray-600 dark:text-dark-300;
+  @apply border-b border-ui-line px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.04em] text-ui-subdued;
 }
 
 .table-scroll-container :deep(td) {
-  @apply px-5 py-4 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-dark-800;
+  @apply border-b border-ui-line/70 px-4 py-3.5 text-sm text-ui-ink;
 }
 
 /* 移动端：恢复正常滚动 */

@@ -2,28 +2,28 @@
   <AuthLayout>
     <div class="space-y-6">
       <!-- Title -->
-      <div class="text-center">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+      <div>
+        <h1 class="text-2xl font-semibold tracking-tight text-ui-ink sm:text-[1.75rem]">
           {{ t('auth.verifyYourEmail') }}
-        </h2>
-        <p class="mt-2 text-sm text-gray-500 dark:text-dark-400">
+        </h1>
+        <p class="mt-1.5 break-words text-sm text-ui-subdued">
           {{ t('auth.sendCodeDesc') }}
-          <span class="font-medium text-gray-700 dark:text-gray-300">{{ email }}</span>
+          <span class="font-medium text-ui-ink">{{ email }}</span>
         </p>
       </div>
 
       <!-- No Data Warning -->
       <div
         v-if="!hasRegisterData"
-        class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20"
+        class="rounded-lg border border-amber-200 bg-amber-50/90 p-4 dark:border-amber-800/50 dark:bg-amber-950/35"
       >
         <div class="flex items-start gap-3">
           <div class="flex-shrink-0">
-            <Icon name="exclamationCircle" size="md" class="text-amber-500" />
+            <Icon name="exclamationCircle" size="md" class="text-amber-600 dark:text-amber-400" aria-hidden="true" />
           </div>
-          <div class="text-sm text-amber-700 dark:text-amber-400">
+          <div class="text-sm text-amber-900 dark:text-amber-200">
             <p class="font-medium">{{ t('auth.sessionExpired') }}</p>
-            <p class="mt-1">{{ t('auth.sessionExpiredDesc') }}</p>
+            <p class="mt-1 text-amber-800 dark:text-amber-300">{{ t('auth.sessionExpiredDesc') }}</p>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@
       <form v-else @submit.prevent="handleVerify" class="space-y-5">
         <!-- Verification Code Input -->
         <div>
-          <label for="code" class="input-label text-center">
+          <label for="code" class="input-label">
             {{ t('auth.verificationCode') }}
           </label>
           <input
@@ -44,23 +44,24 @@
             inputmode="numeric"
             maxlength="6"
             :disabled="isLoading"
-            class="input py-3 text-center font-mono text-xl tracking-[0.5em]"
+            class="input min-h-12 py-3 text-center font-mono text-xl tracking-[0.45em] tabular-nums"
             :class="{ 'input-error': errors.code }"
+            :aria-invalid="Boolean(errors.code)"
             placeholder="000000"
           />
-          <p class="input-hint text-center">{{ t('auth.verificationCodeHint') }}</p>
+          <p class="input-hint">{{ t('auth.verificationCodeHint') }}</p>
         </div>
 
         <!-- Code Status -->
         <div
           v-if="codeSent"
-          class="rounded-xl border border-green-200 bg-green-50 p-4 dark:border-green-800/50 dark:bg-green-900/20"
+          class="rounded-lg border border-emerald-200 bg-emerald-50/90 p-3.5 dark:border-emerald-800/50 dark:bg-emerald-950/35"
         >
-          <div class="flex items-start gap-3">
+          <div class="flex items-start gap-2.5">
             <div class="flex-shrink-0">
-              <Icon name="checkCircle" size="md" class="text-green-500" />
+              <Icon name="checkCircle" size="sm" class="mt-0.5 text-emerald-700 dark:text-emerald-400" aria-hidden="true" />
             </div>
-            <p class="text-sm text-green-700 dark:text-green-400">
+            <p class="text-sm text-emerald-900 dark:text-emerald-200">
               {{ t('auth.codeSentSuccess') }}
             </p>
           </div>

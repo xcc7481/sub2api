@@ -467,6 +467,7 @@ const onDropdownKeyDown = (e: KeyboardEvent) => {
       break
     case 'Escape':
       e.preventDefault()
+      e.stopPropagation()
       isOpen.value = false
       triggerRef.value?.focus()
       break
@@ -520,26 +521,32 @@ onUnmounted(() => {
 <style scoped>
 .select-trigger {
   @apply flex w-full items-center justify-between gap-2;
-  @apply rounded-lg px-4 py-2.5 text-sm;
-  @apply bg-ui-surface;
-  @apply border border-ui-control;
-  @apply text-ui-ink;
+  @apply px-3.5 py-2 text-sm;
+  border-radius: var(--ui-radius-control);
+  @apply border border-ui-control bg-ui-surface text-ui-ink;
   @apply transition-colors duration-150 motion-reduce:transition-none;
-  @apply focus:border-ui-focus;
-  @apply hover:border-ui-focus;
+  @apply hover:border-ui-control-hover;
+  @apply focus:border-ui-focus focus:outline-none;
   @apply cursor-pointer;
 }
 
+.select-trigger:focus-visible {
+  outline: none;
+  border-color: rgb(var(--ui-focus));
+  box-shadow: 0 0 0 3px rgb(var(--ui-focus) / 0.16);
+}
+
 .select-trigger-open {
-  @apply border-primary-500 ring-2 ring-primary-500/30;
+  @apply border-ui-focus;
+  box-shadow: 0 0 0 3px rgb(var(--ui-focus) / 0.16);
 }
 
 .select-trigger-error {
-  @apply border-red-500 focus:border-red-500 focus:ring-red-500/30;
+  @apply border-red-600 dark:border-red-400;
 }
 
 .select-trigger-disabled {
-  @apply cursor-not-allowed bg-gray-100 opacity-60 dark:bg-dark-900;
+  @apply cursor-not-allowed bg-ui-muted/65 text-ui-subdued opacity-70;
 }
 
 .select-value {
@@ -547,37 +554,31 @@ onUnmounted(() => {
 }
 
 .select-icon {
-  @apply flex-shrink-0 text-gray-400 dark:text-dark-400;
+  @apply flex-shrink-0 text-ui-subdued;
 }
 
 .select-clear {
   @apply flex flex-shrink-0 cursor-pointer items-center justify-center;
-  @apply rounded text-gray-400 transition-colors;
-  @apply hover:text-gray-600 dark:hover:text-gray-200;
+  @apply rounded text-ui-subdued transition-colors;
+  @apply hover:text-ui-ink;
 }
 </style>
 
 <style>
 .select-dropdown-portal {
   @apply w-max min-w-[200px];
-  @apply bg-ui-surface;
-  @apply rounded-xl;
-  @apply border border-gray-200 dark:border-dark-700;
-  @apply shadow-lg shadow-black/10 dark:shadow-black/30;
-  @apply overflow-hidden;
+  @apply overflow-hidden border border-ui-line bg-ui-elevated;
+  border-radius: var(--ui-radius-panel);
+  box-shadow: var(--ui-shadow-popover);
   pointer-events: auto !important;
 }
 
 .select-dropdown-portal .select-search {
-  @apply flex items-center gap-2 px-3 py-2;
-  @apply border-b border-gray-100 dark:border-dark-700;
+  @apply flex items-center gap-2 border-b border-ui-line px-3 py-2;
 }
 
 .select-dropdown-portal .select-search-input {
-  @apply flex-1 bg-transparent text-sm;
-  @apply text-gray-900 dark:text-gray-100;
-  @apply placeholder:text-gray-400 dark:placeholder:text-dark-400;
-  @apply focus:outline-none;
+  @apply flex-1 bg-transparent text-sm text-ui-ink placeholder:text-ui-subdued/80 focus:outline-none;
 }
 
 .select-dropdown-portal .select-options {
@@ -585,21 +586,16 @@ onUnmounted(() => {
 }
 
 .select-dropdown-portal .select-option {
-  @apply flex items-center justify-between gap-2;
-  @apply px-4 py-2.5 text-sm;
-  @apply text-gray-700 dark:text-gray-300;
-  @apply cursor-pointer transition-colors duration-150;
-  @apply hover:bg-gray-50 dark:hover:bg-dark-700;
+  @apply flex cursor-pointer items-center justify-between gap-2 px-3.5 py-2 text-sm text-ui-ink transition-colors duration-150 hover:bg-ui-muted/75;
   pointer-events: auto !important;
 }
 
 .select-dropdown-portal .select-option-selected {
-  @apply bg-primary-50 dark:bg-primary-900/20;
-  @apply text-primary-700 dark:text-primary-300;
+  @apply bg-ui-selected font-medium text-ui-action;
 }
 
 .select-dropdown-portal .select-option-focused {
-  @apply bg-gray-100 dark:bg-dark-700;
+  @apply bg-ui-muted;
 }
 
 .select-dropdown-portal .select-option-disabled {
@@ -607,33 +603,38 @@ onUnmounted(() => {
 }
 
 .select-dropdown-portal .select-option-group {
-  @apply cursor-default select-none;
-  @apply bg-gray-50 dark:bg-dark-900;
-  @apply text-[11px] font-bold uppercase tracking-wider;
-  @apply text-gray-500 dark:text-gray-400;
+  @apply cursor-default select-none bg-ui-canvas/80 text-[11px] font-semibold uppercase tracking-[0.06em] text-ui-subdued;
 }
 
 .select-dropdown-portal .select-option-group:hover {
-  @apply bg-gray-50 dark:bg-dark-900;
+  @apply bg-ui-canvas/80;
 }
 
 .select-dropdown-portal .select-option-label {
-  @apply flex-1 min-w-0 truncate text-left;
+  @apply min-w-0 flex-1 truncate text-left;
 }
 
 .select-dropdown-portal .select-empty {
-  @apply px-4 py-8 text-center text-sm;
-  @apply text-gray-500 dark:text-dark-400;
+  @apply px-4 py-8 text-center text-sm text-ui-subdued;
 }
 
 .select-dropdown-enter-active,
 .select-dropdown-leave-active {
-  transition: all 0.2s ease;
+  transition:
+    opacity 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .select-dropdown-enter-from,
 .select-dropdown-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-dropdown-enter-active,
+  .select-dropdown-leave-active {
+    transition: none;
+  }
 }
 </style>

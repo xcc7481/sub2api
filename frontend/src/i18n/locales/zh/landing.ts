@@ -16,6 +16,7 @@ export default {
     goToDashboard: '进入控制台',
     apiExample: 'API 请求示例',
     copyRequest: '复制请求体',
+    gatewayBadge: '统一 AI API 网关',
     gatewayTitle: '一个 API',
     gatewayTitleAccent: '接入多种模型',
     // 新增：面向用户的价值主张

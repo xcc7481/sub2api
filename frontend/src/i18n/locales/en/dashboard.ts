@@ -203,7 +203,6 @@ export default {
       },
       gemini: {
         description: 'Add the following environment variables to your terminal profile or run directly in terminal to configure Gemini CLI access.',
-        modelComment: 'If you have Gemini 3 access, you can use: gemini-3-pro-preview',
         note: 'These environment variables will be active in the current terminal session. For permanent configuration, add them to ~/.bashrc, ~/.zshrc, or the appropriate configuration file.',
       },
       grok: {
@@ -229,24 +228,24 @@ export default {
       deepseek: {
         description: 'Configure Claude Code, Codex, or OpenCode through the current DeepSeek group.',
         codexDescription: 'Configure Codex with API key authentication through the current DeepSeek group.',
-        codexConfigTomlHint: 'Save config.toml and restart Codex to load the remote catalog. In local file mode, also download the catalog to the configured path.',
+        codexConfigTomlHint: 'Save config.toml and restart Codex. If you selected a local catalog file, download it to the configured path.',
         codexNote: 'Export SUB2API_API_KEY before starting Codex. The downloaded catalog contains model metadata only, not your API key.',
       },
       minimax: {
         description: 'Configure Claude Code, Codex, or OpenCode through the current MiniMax group.',
         codexDescription: 'Configure Codex with API key authentication through the current MiniMax group.',
-        codexConfigTomlHint: 'Save config.toml and restart Codex to load the remote catalog. In local file mode, also download the catalog to the configured path.',
+        codexConfigTomlHint: 'Save config.toml and restart Codex. If you selected a local catalog file, download it to the configured path.',
         codexNote: 'Export SUB2API_API_KEY before starting Codex. The downloaded catalog contains model metadata only, not your API key.',
       },
       composite: {
         description: 'Configure supported clients through the current Composite routing group.',
-        codexDescription: 'Configure Codex with API key authentication and the complete model catalog for this Composite group.',
-        codexConfigTomlHint: 'Save config.toml and restart Codex to load the remote catalog. In local file mode, also download the catalog to the configured path.',
+        codexDescription: 'Configure Codex with API key authentication for this Composite group.',
+        codexConfigTomlHint: 'Save config.toml and restart Codex. If you selected a local catalog file, download it to the configured path.',
         codexNote: 'Export SUB2API_API_KEY before starting Codex. Model requests are routed by the selected catalog slug.',
       },
       routedCodex: {
-        description: 'Configure Codex with the complete model catalog for the current routed group.',
-        configTomlHint: 'Save config.toml and restart Codex to load the remote catalog. In local file mode, also download the catalog to the configured path.',
+        description: 'Configure Codex for the current routed group.',
+        configTomlHint: 'Save config.toml and restart Codex. If you selected a local catalog file, download it to the configured path.',
         note: 'Export SUB2API_API_KEY before starting Codex. The downloaded catalog contains model metadata only, not your API key.',
       },
       codexModelCatalog: {
@@ -255,12 +254,9 @@ export default {
         local: 'Local file (older clients)',
         oversized: 'The complete catalog exceeds the 1 MiB remote limit. Local file mode is selected; download it to the configured path.',
         title: 'Codex model catalog',
-        description: 'Codex loads and refreshes the remote catalog using your configured authentication. For local file mode, fetch the catalog below and save it at the configured path.',
-        fetch: 'Fetch catalog',
-        retry: 'Retry',
+        description: 'Codex loads and refreshes the remote catalog using your configured authentication. For local file mode, download the catalog and save it at the configured path.',
         download: 'Download catalog',
         modelsCount: '{count} models ready to download',
-        errorDescription: 'The catalog could not be fetched with this API key.',
       },
       opencode: {
         title: 'OpenCode Example',

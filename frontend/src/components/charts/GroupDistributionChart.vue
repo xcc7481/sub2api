@@ -1,64 +1,55 @@
 <template>
-  <div class="card p-4">
-    <div class="mb-4 flex items-center justify-between gap-3">
-      <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
+  <div class="card p-5">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <h3 class="text-base font-semibold tracking-tight text-ui-ink">
         {{ t('admin.dashboard.groupDistribution') }}
       </h3>
-      <div
-        v-if="showMetricToggle"
-        class="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-dark-700 dark:bg-dark-800"
-      >
+      <div v-if="showMetricToggle" class="segmented-group">
         <button
           type="button"
-          class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-          :class="metric === 'tokens'
-            ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+          class="segmented-btn"
+          :class="{ 'segmented-btn-active': metric === 'tokens' }"
           @click="emit('update:metric', 'tokens')"
         >
           {{ t('admin.dashboard.metricTokens') }}
         </button>
         <button
           type="button"
-          class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-          :class="metric === 'actual_cost'
-            ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+          class="segmented-btn"
+          :class="{ 'segmented-btn-active': metric === 'actual_cost' }"
           @click="emit('update:metric', 'actual_cost')"
         >
           {{ t('admin.dashboard.metricActualCost') }}
         </button>
       </div>
     </div>
-    <div v-if="loading" class="flex h-48 items-center justify-center">
-      <LoadingSpinner />
-    </div>
+    <DashboardPanelState v-if="loading" status="loading" />
     <div v-else-if="displayGroupStats.length > 0 && chartData" class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
       <div class="h-48 w-48 shrink-0">
         <Doughnut :data="chartData" :options="doughnutOptions" />
       </div>
       <div class="max-h-48 w-full min-w-0 flex-1 overflow-auto">
-        <table class="w-full text-xs">
+        <table class="w-full text-xs tabular-nums">
           <thead>
-            <tr class="text-gray-500 dark:text-gray-400">
-              <th class="pb-2 text-left">{{ t('admin.dashboard.group') }}</th>
-              <th class="pb-2 text-right">{{ t('admin.dashboard.requests') }}</th>
-              <th class="pb-2 text-right">{{ t('admin.dashboard.tokens') }}</th>
-              <th class="pb-2 text-right">{{ t('admin.dashboard.actual') }}</th>
-              <th v-if="showAccountCost" class="pb-2 text-right">{{ t('admin.dashboard.accountCost') }}</th>
-              <th class="pb-2 text-right">{{ t('admin.dashboard.standard') }}</th>
+            <tr class="text-ui-subdued">
+              <th class="pb-2 text-left font-semibold">{{ t('admin.dashboard.group') }}</th>
+              <th class="pb-2 text-right font-semibold">{{ t('admin.dashboard.requests') }}</th>
+              <th class="pb-2 text-right font-semibold">{{ t('admin.dashboard.tokens') }}</th>
+              <th class="pb-2 text-right font-semibold">{{ t('admin.dashboard.actual') }}</th>
+              <th v-if="showAccountCost" class="pb-2 text-right font-semibold">{{ t('admin.dashboard.accountCost') }}</th>
+              <th class="pb-2 text-right font-semibold">{{ t('admin.dashboard.standard') }}</th>
             </tr>
           </thead>
           <tbody>
             <template v-for="group in displayGroupStats" :key="group.group_id">
               <tr
-                class="border-t border-gray-100 transition-colors dark:border-dark-700"
-                :class="enableBreakdown && group.group_id > 0 ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-700/40' : ''"
+                class="border-t border-ui-line/80 transition-colors"
+                :class="enableBreakdown && group.group_id > 0 ? 'cursor-pointer hover:bg-ui-canvas/80' : ''"
                 @click="enableBreakdown && group.group_id > 0 && toggleBreakdown('group', group.group_id)"
               >
                 <td
-                  class="max-w-[100px] truncate py-1.5 font-medium"
-                  :class="enableBreakdown && group.group_id > 0 ? 'text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300' : 'text-gray-900 dark:text-white'"
+                  class="max-w-[120px] truncate py-1.5 font-medium"
+                  :class="enableBreakdown && group.group_id > 0 ? 'text-ui-action hover:text-ui-action-hover' : 'text-ui-ink'"
                   :title="group.group_name || String(group.group_id)"
                 >
                   <span class="inline-flex items-center gap-1">
@@ -67,19 +58,19 @@
                     {{ group.group_name || t('admin.dashboard.noGroup') }}
                   </span>
                 </td>
-                <td class="py-1.5 text-right text-gray-600 dark:text-gray-400">
+                <td class="py-1.5 text-right text-ui-subdued">
                   {{ formatNumber(group.requests) }}
                 </td>
-                <td class="py-1.5 text-right text-gray-600 dark:text-gray-400">
+                <td class="py-1.5 text-right text-ui-subdued">
                   {{ formatTokens(group.total_tokens) }}
                 </td>
-                <td class="py-1.5 text-right text-green-600 dark:text-green-400">
+                <td class="py-1.5 text-right font-medium text-ui-action">
                   ${{ formatCost(group.actual_cost) }}
                 </td>
-                <td v-if="showAccountCost" class="py-1.5 text-right text-orange-500 dark:text-orange-400">
+                <td v-if="showAccountCost" class="py-1.5 text-right text-amber-700 dark:text-amber-400">
                   ${{ formatCost(group.account_cost) }}
                 </td>
-                <td class="py-1.5 text-right text-gray-400 dark:text-gray-500">
+                <td class="py-1.5 text-right text-ui-subdued">
                   ${{ formatCost(group.cost) }}
                 </td>
               </tr>
@@ -98,22 +89,19 @@
         </table>
       </div>
     </div>
-    <div
-      v-else
-      class="flex h-48 items-center justify-center text-sm text-gray-500 dark:text-gray-400"
-    >
-      {{ t('admin.dashboard.noDataAvailable') }}
-    </div>
+    <DashboardPanelState v-else status="empty" :message="t('admin.dashboard.noDataAvailable')" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { useMutationObserver, usePreferredReducedMotion } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
-import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import DashboardPanelState from '@/components/common/DashboardPanelState.vue'
 import UserBreakdownSubTable from './UserBreakdownSubTable.vue'
+import { getEditorialChartPalette } from '@/utils/chartTheme'
 import type { GroupStat, UserBreakdownItem } from '@/types'
 import { getUserBreakdown } from '@/api/admin/dashboard'
 
@@ -175,18 +163,13 @@ const toggleBreakdown = async (type: string, id: number | string) => {
   }
 }
 
-const chartColors = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#ec4899',
-  '#14b8a6',
-  '#f97316',
-  '#6366f1',
-  '#84cc16'
-]
+const themeRoot = document.documentElement
+const isDarkMode = ref(themeRoot.classList.contains('dark'))
+useMutationObserver(themeRoot, () => {
+  isDarkMode.value = themeRoot.classList.contains('dark')
+}, { attributes: true, attributeFilter: ['class'] })
+
+const palette = computed(() => getEditorialChartPalette(isDarkMode.value))
 
 const displayGroupStats = computed(() => {
   if (!props.groupStats?.length) return []
@@ -197,27 +180,38 @@ const displayGroupStats = computed(() => {
 
 const chartData = computed(() => {
   if (!props.groupStats?.length) return null
+  const colors = palette.value.series
 
   return {
     labels: displayGroupStats.value.map((g) => g.group_name || String(g.group_id)),
     datasets: [
       {
         data: displayGroupStats.value.map((g) => toFiniteNumber(props.metric === 'actual_cost' ? g.actual_cost : g.total_tokens)),
-        backgroundColor: chartColors.slice(0, displayGroupStats.value.length),
+        backgroundColor: displayGroupStats.value.map((_, i) => colors[i % colors.length]),
         borderWidth: 0
       }
     ]
   }
 })
 
+const reducedMotion = usePreferredReducedMotion()
 const doughnutOptions = computed(() => ({
   responsive: true,
+  cutout: '64%',
+  animation: reducedMotion.value === 'reduce' ? false as const : undefined,
   maintainAspectRatio: false,
   plugins: {
     legend: {
       display: false
     },
     tooltip: {
+      backgroundColor: palette.value.tooltipBg,
+      titleColor: palette.value.tooltipTitle,
+      bodyColor: palette.value.tooltipBody,
+      borderColor: palette.value.tooltipBorder,
+      borderWidth: 1,
+      padding: 10,
+      cornerRadius: 8,
       callbacks: {
         label: (context: any) => {
           const value = context.raw as number

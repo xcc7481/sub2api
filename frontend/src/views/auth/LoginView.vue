@@ -3,10 +3,10 @@
     <div class="space-y-6">
       <!-- Title -->
       <div>
-        <h1 class="text-3xl font-semibold tracking-tight text-ui-ink sm:text-4xl">
+        <h1 class="text-2xl font-semibold tracking-tight text-ui-ink sm:text-[1.75rem]">
           {{ t('auth.welcomeBack') }}
         </h1>
-        <p class="mt-2 break-words text-sm text-ui-subdued">
+        <p class="mt-1.5 break-words text-sm text-ui-subdued">
           {{ t('auth.signInToAccount') }}
         </p>
       </div>
@@ -19,7 +19,7 @@
           </label>
           <div class="relative">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="mail" size="md" class="text-gray-400 dark:text-dark-500" />
+              <Icon name="mail" size="sm" class="text-ui-subdued" aria-hidden="true" />
             </div>
             <input
               id="email"
@@ -29,7 +29,7 @@
               autofocus
               autocomplete="email"
               :disabled="authActionDisabled"
-              class="input min-h-11 pl-11"
+              class="input min-h-11 pl-10"
               :class="{ 'input-error': errors.email }"
               :aria-invalid="Boolean(errors.email)"
               :placeholder="t('auth.emailPlaceholder')"
@@ -44,7 +44,7 @@
           </label>
           <div class="relative">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="lock" size="md" class="text-gray-400 dark:text-dark-500" />
+              <Icon name="lock" size="sm" class="text-ui-subdued" aria-hidden="true" />
             </div>
             <input
               id="password"
@@ -53,7 +53,7 @@
               required
               autocomplete="current-password"
               :disabled="authActionDisabled"
-              class="input min-h-11 pl-11 pr-11"
+              class="input min-h-11 pl-10 pr-11"
               :class="{ 'input-error': errors.password }"
               :aria-invalid="Boolean(errors.password)"
               :placeholder="t('auth.passwordPlaceholder')"
@@ -63,18 +63,18 @@
               @click="showPassword = !showPassword"
               :aria-label="t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')"
               :disabled="authActionDisabled"
-              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-gray-500 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-ui-subdued transition-colors hover:text-ui-ink"
             >
-              <Icon v-if="showPassword" name="eyeOff" size="md" />
-              <Icon v-else name="eye" size="md" />
+              <Icon v-if="showPassword" name="eyeOff" size="sm" aria-hidden="true" />
+              <Icon v-else name="eye" size="sm" aria-hidden="true" />
             </button>
           </div>
-          <div class="mt-1 flex items-center justify-between">
+          <div class="mt-1.5 flex items-center justify-between">
             <span></span>
             <router-link
               v-if="passwordResetEnabled && !backendModeEnabled"
               to="/forgot-password"
-              class="text-sm font-medium text-primary-600 transition-colors hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              class="text-xs font-medium text-ui-action transition-colors hover:text-ui-action-hover"
             >
               {{ t('auth.forgotPassword') }}
             </router-link>
@@ -100,9 +100,10 @@
           />
         </div>
 
-        <p v-if="errorMessage || validationMessage" id="auth-form-error" class="auth-error" role="alert">
-          {{ errorMessage || validationMessage }}
-        </p>
+        <div v-if="errorMessage || validationMessage" id="auth-form-error" class="auth-error" role="alert">
+          <Icon name="exclamationCircle" size="sm" class="mt-0.5 shrink-0" aria-hidden="true" />
+          <span>{{ errorMessage || validationMessage }}</span>
+        </div>
 
         <!-- Submit Button -->
         <button

@@ -1,93 +1,69 @@
 <template>
-  <div class="card p-4">
+  <div class="card p-5">
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <h3 class="text-base font-semibold tracking-tight">
+      <h3 class="text-base font-semibold tracking-tight text-ui-ink">
         {{ !enableRankingView || activeView === 'model_distribution'
           ? t('admin.dashboard.modelDistribution')
           : t('admin.dashboard.spendingRankingTitle') }}
       </h3>
       <div class="flex flex-wrap items-center justify-end gap-2">
-        <div
-          v-if="showSourceToggle"
-          class="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-dark-700 dark:bg-dark-800"
-        >
+        <div v-if="showSourceToggle" class="segmented-group">
           <button
             type="button"
-            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="source === 'requested'
-              ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            class="segmented-btn"
+            :class="{ 'segmented-btn-active': source === 'requested' }"
             @click="emit('update:source', 'requested')"
           >
             {{ t('usage.requestedModel') }}
           </button>
           <button
             type="button"
-            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="source === 'upstream'
-              ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            class="segmented-btn"
+            :class="{ 'segmented-btn-active': source === 'upstream' }"
             @click="emit('update:source', 'upstream')"
           >
             {{ t('usage.upstreamModel') }}
           </button>
           <button
             type="button"
-            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="source === 'mapping'
-              ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            class="segmented-btn"
+            :class="{ 'segmented-btn-active': source === 'mapping' }"
             @click="emit('update:source', 'mapping')"
           >
             {{ t('usage.mapping') }}
           </button>
         </div>
-        <div
-          v-if="showMetricToggle"
-          class="inline-flex rounded-lg border border-gray-200 bg-gray-50 p-0.5 dark:border-dark-700 dark:bg-dark-800"
-        >
+        <div v-if="showMetricToggle" class="segmented-group">
           <button
             type="button"
-            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="metric === 'tokens'
-              ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            class="segmented-btn"
+            :class="{ 'segmented-btn-active': metric === 'tokens' }"
             @click="emit('update:metric', 'tokens')"
           >
             {{ t('admin.dashboard.metricTokens') }}
           </button>
           <button
             type="button"
-            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="metric === 'actual_cost'
-              ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+            class="segmented-btn"
+            :class="{ 'segmented-btn-active': metric === 'actual_cost' }"
             @click="emit('update:metric', 'actual_cost')"
           >
             {{ t('admin.dashboard.metricActualCost') }}
           </button>
         </div>
-        <div v-if="enableRankingView" class="inline-flex rounded-lg bg-gray-100 p-1 dark:bg-dark-800">
+        <div v-if="enableRankingView" class="segmented-group">
           <button
             type="button"
-            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="
-              activeView === 'model_distribution'
-                ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-            "
+            class="segmented-btn"
+            :class="{ 'segmented-btn-active': activeView === 'model_distribution' }"
             @click="activeView = 'model_distribution'"
           >
             {{ t('admin.dashboard.viewModelDistribution') }}
           </button>
           <button
             type="button"
-            class="rounded-md px-2.5 py-1 text-xs font-medium transition-colors"
-            :class="
-              activeView === 'spending_ranking'
-                ? 'bg-white text-gray-900 shadow-sm dark:bg-dark-700 dark:text-white'
-                : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-            "
+            class="segmented-btn"
+            :class="{ 'segmented-btn-active': activeView === 'spending_ranking' }"
             @click="activeView = 'spending_ranking'"
           >
             {{ t('admin.dashboard.viewSpendingRanking') }}
@@ -230,23 +206,23 @@
         </table>
       </div>
     </div>
-    <div
+    <DashboardPanelState
       v-else
-      class="dashboard-state"
-    >
-      {{ t('admin.dashboard.noDataAvailable') }}
-    </div>
+      status="empty"
+      :message="emptyMessage || t('admin.dashboard.noDataAvailable')"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { usePreferredReducedMotion } from '@vueuse/core'
+import { useMutationObserver, usePreferredReducedMotion } from '@vueuse/core'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
 import { Doughnut } from 'vue-chartjs'
 import DashboardPanelState from '@/components/common/DashboardPanelState.vue'
 import UserBreakdownSubTable from './UserBreakdownSubTable.vue'
+import { getEditorialChartPalette } from '@/utils/chartTheme'
 import type { ModelStat, UserSpendingRankingItem, UserBreakdownItem } from '@/types'
 import { getUserBreakdown } from '@/api/admin/dashboard'
 
@@ -341,20 +317,13 @@ const showAccountCost = computed(() => props.showAccountCost)
 const distributionColspan = computed(() => showAccountCost.value ? 6 : 5)
 const activeView = ref<'model_distribution' | 'spending_ranking'>('model_distribution')
 
-const chartColors = [
-  '#3b82f6',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#8b5cf6',
-  '#ec4899',
-  '#14b8a6',
-  '#f97316',
-  '#6366f1',
-  '#84cc16',
-  '#06b6d4',
-  '#a855f7'
-]
+const themeRoot = document.documentElement
+const isDarkMode = ref(themeRoot.classList.contains('dark'))
+useMutationObserver(themeRoot, () => {
+  isDarkMode.value = themeRoot.classList.contains('dark')
+}, { attributes: true, attributeFilter: ['class'] })
+
+const palette = computed(() => getEditorialChartPalette(isDarkMode.value))
 
 const displayModelStats = computed(() => {
   const sourceStats = props.source === 'upstream'
@@ -370,13 +339,14 @@ const displayModelStats = computed(() => {
 
 const chartData = computed(() => {
   if (!displayModelStats.value.length) return null
+  const colors = palette.value.series
 
   return {
     labels: displayModelStats.value.map((m) => m.model),
     datasets: [
       {
         data: displayModelStats.value.map((m) => toFiniteNumber(props.metric === 'actual_cost' ? m.actual_cost : m.total_tokens)),
-        backgroundColor: chartColors.slice(0, displayModelStats.value.length),
+        backgroundColor: displayModelStats.value.map((_, i) => colors[i % colors.length]),
         borderWidth: 0
       }
     ]
@@ -385,15 +355,16 @@ const chartData = computed(() => {
 
 const rankingChartData = computed(() => {
   if (!props.rankingItems?.length) return null
+  const colors = palette.value.series
 
   const labels = props.rankingItems.map((item, index) => `#${index + 1} ${getRankingUserLabel(item)}`)
   const data = props.rankingItems.map((item) => toFiniteNumber(item.actual_cost))
-  const backgroundColor = chartColors.slice(0, props.rankingItems.length)
+  const backgroundColor = props.rankingItems.map((_, i) => colors[i % colors.length])
 
   if (otherRankingItem.value) {
     labels.push(t('admin.dashboard.spendingRankingOther'))
     data.push(otherRankingItem.value.actual_cost)
-    backgroundColor.push('#94a3b8')
+    backgroundColor.push(isDarkMode.value ? '#636366' : '#AEAEB2')
   }
 
   return {
@@ -442,6 +413,7 @@ const rankingDisplayItems = computed<RankingDisplayItem[]>(() => {
 const reducedMotion = usePreferredReducedMotion()
 const doughnutOptions = computed(() => ({
   responsive: true,
+  cutout: '64%',
   animation: reducedMotion.value === 'reduce' ? false as const : undefined,
   maintainAspectRatio: false,
   plugins: {
@@ -449,6 +421,13 @@ const doughnutOptions = computed(() => ({
       display: false
     },
     tooltip: {
+      backgroundColor: palette.value.tooltipBg,
+      titleColor: palette.value.tooltipTitle,
+      bodyColor: palette.value.tooltipBody,
+      borderColor: palette.value.tooltipBorder,
+      borderWidth: 1,
+      padding: 10,
+      cornerRadius: 8,
       callbacks: {
         label: (context: any) => {
           const value = context.raw as number
@@ -466,6 +445,7 @@ const doughnutOptions = computed(() => ({
 
 const rankingDoughnutOptions = computed(() => ({
   responsive: true,
+  cutout: '64%',
   animation: reducedMotion.value === 'reduce' ? false as const : undefined,
   maintainAspectRatio: false,
   plugins: {
@@ -473,6 +453,13 @@ const rankingDoughnutOptions = computed(() => ({
       display: false
     },
     tooltip: {
+      backgroundColor: palette.value.tooltipBg,
+      titleColor: palette.value.tooltipTitle,
+      bodyColor: palette.value.tooltipBody,
+      borderColor: palette.value.tooltipBorder,
+      borderWidth: 1,
+      padding: 10,
+      cornerRadius: 8,
       callbacks: {
         label: (context: any) => {
           const value = context.raw as number

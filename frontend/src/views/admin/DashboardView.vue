@@ -218,7 +218,7 @@
           <!-- Date Range Filter -->
           <div class="dashboard-toolbar">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
+              <span class="text-xs font-medium text-ui-subdued"
                 >{{ t('admin.dashboard.timeRange') }}:</span
               >
               <DateRangePicker
@@ -231,7 +231,7 @@
               {{ t('common.refresh') }}
             </button>
             <div class="flex items-center gap-2 md:ml-auto">
-              <span class="text-sm font-medium text-gray-700 dark:text-gray-300"
+              <span class="text-xs font-medium text-ui-subdued"
                 >{{ t('admin.dashboard.granularity') }}:</span
               >
               <div class="w-28">

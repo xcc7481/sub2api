@@ -22,7 +22,7 @@
       <div class="sidebar-brand" :class="{ 'sidebar-brand-collapsed': sidebarCollapsed }" :aria-hidden="sidebarCollapsed ? 'true' : 'false'">
         <router-link
           :to="homePath"
-          class="sidebar-brand-title text-base font-semibold tracking-tight text-gray-900 transition-colors hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
+          class="sidebar-brand-title text-base font-semibold tracking-tight text-ui-ink transition-colors hover:text-ui-action"
           @click="handleMenuItemClick(homePath)"
         >
           {{ siteName }}
@@ -48,6 +48,7 @@
                   'sidebar-link-active': isGroupActive(item) && !isGroupExpanded(item),
                   'sidebar-link-collapsed': sidebarCollapsed
                 }"
+                :aria-expanded="!sidebarCollapsed && isGroupExpanded(item)"
                 :title="sidebarCollapsed ? item.label : undefined"
                 @click="handleGroupClick(item)"
               >
@@ -65,7 +66,7 @@
                 </span>
               </button>
               <!-- Children -->
-              <div v-if="!sidebarCollapsed && isGroupExpanded(item)" class="sidebar-divider mb-1 ml-4 border-l pl-2 dark:border-dark-600">
+              <div v-if="!sidebarCollapsed && isGroupExpanded(item)" class="sidebar-divider mb-1.5 ml-4 border-l pl-2">
                 <router-link
                   v-for="child in item.children"
                   :key="child.path"
@@ -1069,7 +1070,7 @@ onBeforeUnmount(() => {
 }
 
 .dark .sidebar-section-title::after {
-  background: rgb(55 65 81);
+  background: var(--sidebar-divider);
 }
 
 .sidebar-section-title-text-collapsed {

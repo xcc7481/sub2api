@@ -15,15 +15,17 @@
     </template>
 
     <template v-else-if="!data || data.length === 0">
-      <div class="card p-12 text-center">
+      <div class="card p-10 text-center">
         <slot name="empty">
           <div class="flex flex-col items-center">
-            <Icon
-              name="inbox"
-              size="xl"
-              class="mb-4 h-12 w-12 text-gray-400 dark:text-dark-500"
-            />
-            <p class="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <div class="mb-3.5 flex h-12 w-12 items-center justify-center rounded-xl border border-ui-line bg-ui-canvas text-ui-subdued">
+              <Icon
+                name="inbox"
+                size="md"
+                aria-hidden="true"
+              />
+            </div>
+            <p class="text-sm font-medium text-ui-ink">
               {{ t('empty.noData') }}
             </p>
           </div>
@@ -1106,21 +1108,21 @@ tbody tr:hover .sticky-col {
 
 /* 常驻、不透明的滑块，无视鼠标是否 hover 都在那！ */
 .table-wrapper::-webkit-scrollbar-thumb {
-  background-color: rgba(107, 114, 128, 0.75) !important; 
+  background-color: rgb(var(--ui-control) / 0.85) !important;
   border-radius: 6px !important;
   border: 2px solid transparent !important;
   background-clip: padding-box !important;
   -webkit-appearance: none !important;
 }
 .table-wrapper::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(75, 85, 99, 0.9) !important;
+  background-color: rgb(var(--ui-control-hover)) !important;
 }
 
 .dark .table-wrapper::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.75) !important;
+  background-color: rgb(var(--ui-control) / 0.9) !important;
 }
 .dark .table-wrapper::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(209, 213, 219, 0.9) !important;
+  background-color: rgb(var(--ui-control-hover)) !important;
 }
 
 /* 3. 仅给真正的 Firefox 留的后路 */

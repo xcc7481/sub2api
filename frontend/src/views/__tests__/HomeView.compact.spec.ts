@@ -184,4 +184,21 @@ describe('HomeView compact mode', () => {
 
     expect(modelPlazaDestination(wrapper)).toBeUndefined()
   })
+
+  it('switches protocol request examples via accessible tabs', async () => {
+    const wrapper = mountHome({ compact_home_enabled: false })
+    const tabs = wrapper.findAll('[role="tab"]')
+
+    expect(tabs).toHaveLength(3)
+    expect(tabs[0].attributes('aria-selected')).toBe('true')
+    expect(wrapper.get('figure').text()).toContain('/v1/messages')
+
+    await tabs[1].trigger('click')
+    expect(tabs[1].attributes('aria-selected')).toBe('true')
+    expect(wrapper.get('figure').text()).toContain('/v1/responses')
+
+    await tabs[2].trigger('click')
+    expect(tabs[2].attributes('aria-selected')).toBe('true')
+    expect(wrapper.get('figure').text()).toContain('/v1beta/models/YOUR_MODEL:generateContent')
+  })
 })

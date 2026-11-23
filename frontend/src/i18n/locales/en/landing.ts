@@ -16,6 +16,7 @@ export default {
     goToDashboard: 'Go to Dashboard',
     apiExample: 'API request example',
     copyRequest: 'Copy request body',
+    gatewayBadge: 'Unified AI API Gateway',
     gatewayTitle: 'One API.',
     gatewayTitleAccent: 'Many models.',
     // User-focused value proposition

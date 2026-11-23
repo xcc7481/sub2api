@@ -1,6 +1,6 @@
 <template>
-  <div class="card p-4">
-    <h3 class="mb-4 text-base font-semibold tracking-tight">
+  <div class="card p-5">
+    <h3 class="mb-4 text-base font-semibold tracking-tight text-ui-ink">
       {{ t('admin.dashboard.tokenUsageTrend') }}
     </h3>
     <DashboardPanelState v-if="loading" status="loading" />
@@ -29,6 +29,7 @@ import {
 } from 'chart.js'
 import { Line } from 'vue-chartjs'
 import DashboardPanelState from '@/components/common/DashboardPanelState.vue'
+import { getEditorialChartFontFamily, getEditorialChartPalette } from '@/utils/chartTheme'
 import type { TrendDataPoint } from '@/types'
 
 ChartJS.register(
@@ -58,18 +59,12 @@ useMutationObserver(themeRoot, () => {
   isDarkMode.value = themeRoot.classList.contains('dark')
 }, { attributes: true, attributeFilter: ['class'] })
 
-const chartColors = computed(() => ({
-  text: isDarkMode.value ? '#e5e7eb' : '#374151',
-  grid: isDarkMode.value ? '#374151' : '#e5e7eb',
-  input: '#3b82f6',
-  output: '#10b981',
-  cacheCreation: '#f59e0b',
-  cacheRead: '#06b6d4',
-  cacheHitRate: '#8b5cf6'
-}))
+const palette = computed(() => getEditorialChartPalette(isDarkMode.value))
+const chartFont = getEditorialChartFontFamily()
 
 const chartData = computed(() => {
   if (!props.trendData?.length) return null
+  const s = palette.value.semantic
 
   return {
     labels: props.trendData.map((d) => d.date),
@@ -77,34 +72,46 @@ const chartData = computed(() => {
       {
         label: 'Input',
         data: props.trendData.map((d) => d.input_tokens),
-        borderColor: chartColors.value.input,
-        backgroundColor: `${chartColors.value.input}20`,
+        borderColor: s.input,
+        backgroundColor: `${s.input}1c`,
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 4,
         fill: true,
-        tension: 0.3
+        tension: 0.32
       },
       {
         label: 'Output',
         data: props.trendData.map((d) => d.output_tokens),
-        borderColor: chartColors.value.output,
-        backgroundColor: `${chartColors.value.output}20`,
+        borderColor: s.output,
+        backgroundColor: `${s.output}1c`,
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 4,
         fill: true,
-        tension: 0.3
+        tension: 0.32
       },
       {
         label: 'Cache Creation',
         data: props.trendData.map((d) => d.cache_creation_tokens),
-        borderColor: chartColors.value.cacheCreation,
-        backgroundColor: `${chartColors.value.cacheCreation}20`,
+        borderColor: s.cacheCreation,
+        backgroundColor: `${s.cacheCreation}1c`,
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 4,
         fill: true,
-        tension: 0.3
+        tension: 0.32
       },
       {
         label: 'Cache Read',
         data: props.trendData.map((d) => d.cache_read_tokens),
-        borderColor: chartColors.value.cacheRead,
-        backgroundColor: `${chartColors.value.cacheRead}20`,
+        borderColor: s.cacheRead,
+        backgroundColor: `${s.cacheRead}1c`,
+        borderWidth: 2,
+        pointRadius: 2,
+        pointHoverRadius: 4,
         fill: true,
-        tension: 0.3
+        tension: 0.32
       },
       {
         label: 'Cache Hit Rate',
@@ -112,11 +119,14 @@ const chartData = computed(() => {
           const totalPromptTokens = d.input_tokens + d.cache_read_tokens + d.cache_creation_tokens
           return totalPromptTokens > 0 ? (d.cache_read_tokens / totalPromptTokens) * 100 : 0
         }),
-        borderColor: chartColors.value.cacheHitRate,
-        backgroundColor: `${chartColors.value.cacheHitRate}20`,
+        borderColor: s.cacheHitRate,
+        backgroundColor: `${s.cacheHitRate}1c`,
+        borderWidth: 1.75,
         borderDash: [5, 5],
+        pointRadius: 2,
+        pointHoverRadius: 4,
         fill: false,
-        tension: 0.3,
+        tension: 0.32,
         yAxisID: 'yPercent'
       }
     ]
@@ -136,16 +146,26 @@ const lineOptions = computed(() => ({
     legend: {
       position: 'top' as const,
       labels: {
-        color: chartColors.value.text,
+        color: palette.value.text,
         usePointStyle: true,
         pointStyle: 'circle',
-        padding: 15,
+        boxWidth: 6,
+        boxHeight: 6,
+        padding: 14,
         font: {
+          family: chartFont,
           size: 11
         }
       }
     },
     tooltip: {
+      backgroundColor: palette.value.tooltipBg,
+      titleColor: palette.value.tooltipTitle,
+      bodyColor: palette.value.tooltipBody,
+      borderColor: palette.value.tooltipBorder,
+      borderWidth: 1,
+      padding: 10,
+      cornerRadius: 8,
       callbacks: {
         label: (context: any) => {
           if (context.dataset.yAxisID === 'yPercent') {
@@ -167,22 +187,24 @@ const lineOptions = computed(() => ({
   scales: {
     x: {
       grid: {
-        color: chartColors.value.grid
+        color: palette.value.grid
       },
       ticks: {
-        color: chartColors.value.text,
+        color: palette.value.mutedText,
         font: {
+          family: chartFont,
           size: 10
         }
       }
     },
     y: {
       grid: {
-        color: chartColors.value.grid
+        color: palette.value.grid
       },
       ticks: {
-        color: chartColors.value.text,
+        color: palette.value.mutedText,
         font: {
+          family: chartFont,
           size: 10
         },
         callback: (value: string | number) => formatTokens(Number(value))
@@ -196,8 +218,9 @@ const lineOptions = computed(() => ({
         drawOnChartArea: false
       },
       ticks: {
-        color: chartColors.value.cacheHitRate,
+        color: palette.value.semantic.cacheHitRate,
         font: {
+          family: chartFont,
           size: 10
         },
         callback: (value: string | number) => `${value}%`

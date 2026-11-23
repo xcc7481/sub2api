@@ -3,10 +3,10 @@
     <div class="space-y-6">
       <!-- Title -->
       <div>
-        <h1 class="text-3xl font-semibold tracking-tight text-ui-ink sm:text-4xl">
+        <h1 class="text-2xl font-semibold tracking-tight text-ui-ink sm:text-[1.75rem]">
           {{ t('auth.createAccount') }}
         </h1>
-        <p class="mt-2 break-words text-sm text-ui-subdued">
+        <p class="mt-1.5 break-words text-sm text-ui-subdued">
           {{ t('auth.signUpToStart', { siteName }) }}
         </p>
       </div>
@@ -14,13 +14,13 @@
       <!-- Registration Disabled Message -->
       <div
         v-if="!registrationEnabled && settingsLoaded"
-        class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20"
+        class="rounded-lg border border-amber-200 bg-amber-50/90 p-4 dark:border-amber-800/50 dark:bg-amber-950/35"
       >
         <div class="flex items-start gap-3">
           <div class="flex-shrink-0">
-            <Icon name="exclamationCircle" size="md" class="text-amber-500" />
+            <Icon name="exclamationCircle" size="md" class="text-amber-600 dark:text-amber-400" aria-hidden="true" />
           </div>
-          <p class="text-sm text-amber-700 dark:text-amber-400">
+          <p class="text-sm text-amber-900 dark:text-amber-200">
             {{ t('auth.registrationDisabled') }}
           </p>
         </div>
@@ -35,7 +35,7 @@
           </label>
           <div class="relative">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="mail" size="md" class="text-gray-400 dark:text-dark-500" />
+              <Icon name="mail" size="sm" class="text-ui-subdued" aria-hidden="true" />
             </div>
             <input
               id="email"
@@ -45,7 +45,7 @@
               autofocus
               autocomplete="email"
               :disabled="registrationActionDisabled"
-              class="input min-h-11 pl-11"
+              class="input min-h-11 pl-10"
               :class="{ 'input-error': errors.email }"
               :aria-invalid="Boolean(errors.email)"
               :placeholder="t('auth.emailPlaceholder')"
@@ -60,7 +60,7 @@
           </label>
           <div class="relative">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="lock" size="md" class="text-gray-400 dark:text-dark-500" />
+              <Icon name="lock" size="sm" class="text-ui-subdued" aria-hidden="true" />
             </div>
             <input
               id="password"
@@ -69,7 +69,7 @@
               required
               autocomplete="new-password"
               :disabled="registrationActionDisabled"
-              class="input min-h-11 pl-11 pr-11"
+              class="input min-h-11 pl-10 pr-11"
               :class="{ 'input-error': errors.password }"
               :aria-invalid="Boolean(errors.password)"
               :placeholder="t('auth.createPasswordPlaceholder')"
@@ -79,10 +79,10 @@
               :disabled="registrationActionDisabled"
               @click="showPassword = !showPassword"
               :aria-label="t(showPassword ? 'auth.hidePassword' : 'auth.showPassword')"
-              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-gray-500 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-ui-subdued transition-colors hover:text-ui-ink"
             >
-              <Icon v-if="showPassword" name="eyeOff" size="md" />
-              <Icon v-else name="eye" size="md" />
+              <Icon v-if="showPassword" name="eyeOff" size="sm" aria-hidden="true" />
+              <Icon v-else name="eye" size="sm" aria-hidden="true" />
             </button>
           </div>
           <p class="input-hint">
@@ -97,7 +97,7 @@
           </label>
           <div class="relative">
             <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
-              <Icon name="lock" size="md" class="text-gray-400 dark:text-dark-500" />
+              <Icon name="lock" size="sm" class="text-ui-subdued" aria-hidden="true" />
             </div>
             <input
               id="confirmPassword"
@@ -106,7 +106,7 @@
               required
               autocomplete="new-password"
               :disabled="registrationActionDisabled"
-              class="input min-h-11 pl-11 pr-11"
+              class="input min-h-11 pl-10 pr-11"
               :class="{ 'input-error': errors.confirmPassword }"
               :aria-invalid="Boolean(errors.confirmPassword)"
               :placeholder="t('auth.confirmPasswordPlaceholder')"
@@ -116,10 +116,10 @@
               :disabled="registrationActionDisabled"
               @click="showConfirmPassword = !showConfirmPassword"
               :aria-label="t(showConfirmPassword ? 'auth.hidePassword' : 'auth.showPassword')"
-              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-gray-500 transition-colors hover:text-gray-600 dark:hover:text-dark-300"
+              class="absolute inset-y-0 right-0 flex min-w-11 items-center justify-center rounded-lg text-ui-subdued transition-colors hover:text-ui-ink"
             >
-              <Icon v-if="showConfirmPassword" name="eyeOff" size="md" />
-              <Icon v-else name="eye" size="md" />
+              <Icon v-if="showConfirmPassword" name="eyeOff" size="sm" aria-hidden="true" />
+              <Icon v-else name="eye" size="sm" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -271,9 +271,10 @@
           @open="showAgreementModal = true"
         />
 
-        <p v-if="errorMessage || validationMessage" id="auth-form-error" class="auth-error" role="alert">
-          {{ errorMessage || validationMessage }}
-        </p>
+        <div v-if="errorMessage || validationMessage" id="auth-form-error" class="auth-error" role="alert">
+          <Icon name="exclamationCircle" size="sm" class="mt-0.5 shrink-0" aria-hidden="true" />
+          <span>{{ errorMessage || validationMessage }}</span>
+        </div>
 
         <!-- Submit Button -->
         <button
