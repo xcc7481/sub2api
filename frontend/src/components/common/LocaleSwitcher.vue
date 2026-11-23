@@ -1,40 +1,49 @@
 <template>
   <div class="relative" ref="dropdownRef">
     <button
+      ref="triggerRef"
+      type="button"
       @click="toggleDropdown"
       :disabled="switching"
-      class="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+      :aria-expanded="isOpen"
+      aria-haspopup="listbox"
+      class="flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-ui-subdued transition-colors hover:bg-ui-muted/80 hover:text-ui-ink motion-reduce:transition-none"
       :title="currentLocale?.name"
     >
-      <span class="text-base">{{ currentLocale?.flag }}</span>
+      <span class="text-base" aria-hidden="true">{{ currentLocale?.flag }}</span>
       <span class="hidden sm:inline">{{ currentLocale?.code.toUpperCase() }}</span>
       <Icon
         name="chevronDown"
         size="xs"
-        class="text-gray-400 transition-transform duration-200"
+        class="text-ui-subdued transition-transform duration-150 motion-reduce:transition-none"
         :class="{ 'rotate-180': isOpen }"
+        aria-hidden="true"
       />
     </button>
 
     <transition name="dropdown">
       <div
         v-if="isOpen"
-        class="absolute right-0 z-50 mt-1 w-32 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-lg dark:border-dark-700 dark:bg-dark-800"
+        role="listbox"
+        class="dropdown right-0 mt-1.5 w-36 overflow-hidden py-1"
       >
         <button
-          v-for="locale in availableLocales"
-          :key="locale.code"
+          v-for="localeItem in availableLocales"
+          :key="localeItem.code"
+          type="button"
+          role="option"
+          :aria-selected="localeItem.code === currentLocaleCode"
           :disabled="switching"
-          @click="selectLocale(locale.code)"
-          class="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-dark-700"
+          @click="selectLocale(localeItem.code)"
+          class="flex w-full items-center gap-2 px-3 py-2 text-sm text-ui-ink transition-colors hover:bg-ui-muted/80"
           :class="{
-            'bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400':
-              locale.code === currentLocaleCode
+            'bg-ui-selected font-medium text-ui-action':
+              localeItem.code === currentLocaleCode
           }"
         >
-          <span class="text-base">{{ locale.flag }}</span>
-          <span>{{ locale.name }}</span>
-          <Icon v-if="locale.code === currentLocaleCode" name="check" size="sm" class="ml-auto text-primary-500" />
+          <span class="text-base" aria-hidden="true">{{ localeItem.flag }}</span>
+          <span>{{ localeItem.name }}</span>
+          <Icon v-if="localeItem.code === currentLocaleCode" name="check" size="sm" class="ml-auto text-ui-action" aria-hidden="true" />
         </button>
       </div>
     </transition>
@@ -51,6 +60,7 @@ const { locale } = useI18n()
 
 const isOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const triggerRef = ref<HTMLButtonElement | null>(null)
 const switching = ref(false)
 
 const currentLocaleCode = computed(() => locale.value)
@@ -82,24 +92,35 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && isOpen.value) {
+    isOpen.value = false
+    triggerRef.value?.focus({ preventScroll: true })
+  }
+}
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  document.addEventListener('keydown', handleKeydown)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
 <style scoped>
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 0.15s ease;
+  transition:
+    opacity 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dropdown-enter-from,
 .dropdown-leave-to {
   opacity: 0;
-  transform: scale(0.95) translateY(-4px);
+  transform: scale(0.97) translateY(-4px);
 }
 </style>

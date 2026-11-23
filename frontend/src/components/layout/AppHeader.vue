@@ -1,8 +1,8 @@
 <template>
-  <header class="sticky top-0 z-30 border-b border-ui-line bg-ui-surface">
-    <div class="flex h-16 items-center justify-between gap-2 px-2 sm:px-4 md:px-6">
+  <header class="sticky top-0 z-30 border-b border-ui-line bg-ui-surface/80 backdrop-blur-xl backdrop-saturate-150">
+    <div class="flex h-16 items-center justify-between gap-2 px-3 sm:px-5 md:px-6">
       <!-- Left: Mobile Menu Toggle + Page Title -->
-      <div class="flex min-w-0 items-center gap-2 sm:gap-4">
+      <div class="flex min-w-0 items-center gap-2.5 sm:gap-3.5">
         <button
           ref="mobileMenuButton"
           type="button"
@@ -16,7 +16,7 @@
         </button>
 
         <div class="min-w-0">
-          <h1 :title="pageTitle" class="truncate text-sm font-semibold tracking-tight text-ui-ink lg:text-xl">
+          <h1 :title="pageTitle" class="truncate text-base font-semibold tracking-tight text-ui-ink lg:text-lg">
             {{ pageTitle }}
           </h1>
           <p v-if="pageDescription" class="hidden truncate text-xs text-ui-subdued lg:block">
@@ -26,7 +26,7 @@
       </div>
 
       <!-- Right: Announcements + Docs + Language + Subscriptions + Balance + User Dropdown -->
-      <div class="flex min-w-0 shrink-0 items-center gap-1 sm:gap-3">
+      <div class="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
         <!-- Announcement Bell -->
         <AnnouncementBell v-if="user" />
 
@@ -36,9 +36,9 @@
           :href="docUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="hidden items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white sm:flex"
+          class="hidden min-h-9 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-ui-subdued transition-colors hover:bg-ui-muted/80 hover:text-ui-ink sm:flex"
         >
-          <Icon name="book" size="sm" />
+          <Icon name="book" size="sm" aria-hidden="true" />
           <span class="hidden sm:inline">{{ t('nav.docs') }}</span>
         </a>
 
@@ -48,9 +48,9 @@
           :to="{ path: '/model-plaza', query: { embedded: '1' } }"
           :title="t('nav.modelPlaza')"
           :aria-label="t('nav.modelPlaza')"
-          class="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-dark-400 dark:hover:bg-dark-800 dark:hover:text-white"
+          class="flex min-h-9 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-ui-subdued transition-colors hover:bg-ui-muted/80 hover:text-ui-ink"
         >
-          <Icon name="grid" size="sm" />
+          <Icon name="grid" size="sm" aria-hidden="true" />
           <span class="hidden sm:inline">{{ t('nav.modelPlaza') }}</span>
         </router-link>
 
@@ -60,61 +60,84 @@
         <!-- Subscription Progress (for users with active subscriptions; not mounted at all when the feature is off) -->
         <SubscriptionProgressMini v-if="user && subscriptionFeatureEnabled" />
 
-        <!-- Balance Display -->
+        <!-- Balance Display (accessible click/keyboard disclosure, not hover-only) -->
         <div
           v-if="user"
-          class="group relative hidden items-center gap-2 rounded-md bg-ui-selected px-3 py-1.5 sm:flex"
+          ref="balanceRef"
+          class="relative hidden sm:block"
         >
-          <svg
-            class="h-4 w-4 text-ui-action"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            stroke-width="1.5"
+          <button
+            ref="balanceButtonRef"
+            type="button"
+            class="flex min-h-9 items-center gap-2 rounded-lg border border-ui-action/15 bg-ui-selected/85 px-3 py-1.5 text-left transition-colors hover:border-ui-action/30 hover:bg-ui-selected"
+            :aria-expanded="balanceOpen"
+            aria-controls="header-balance-popover"
+            :aria-label="`${t('common.balance')}: ${formatHeaderMoney(availableBalance)}`"
+            @click="toggleBalance"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-            />
-          </svg>
-          <span class="text-sm font-semibold tabular-nums text-ui-action">
-            {{ formatHeaderMoney(availableBalance) }}
-          </span>
-          <span
-            v-if="frozenBalance > 0"
-            class="rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-200"
-          >
-            {{ balanceFrozenLabel }}
-          </span>
-          <div
-            class="pointer-events-none absolute right-0 top-full mt-2 hidden w-56 rounded-lg border border-gray-200 bg-white p-3 text-xs shadow-lg group-hover:block dark:border-dark-700 dark:bg-dark-800"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-gray-500 dark:text-dark-400">{{ balanceAvailableText }}</span>
-              <span class="font-medium text-gray-900 dark:text-white">{{ formatHeaderMoney(availableBalance) }}</span>
-            </div>
-            <div class="mt-2 flex items-center justify-between">
-              <span class="text-gray-500 dark:text-dark-400">{{ balanceFrozenText }}</span>
-              <span class="font-medium text-amber-700 dark:text-amber-200">{{ formatHeaderMoney(frozenBalance) }}</span>
-            </div>
-            <div class="mt-2 border-t border-gray-100 pt-2 dark:border-dark-700">
-              <div class="flex items-center justify-between">
-                <span class="text-gray-500 dark:text-dark-400">{{ balanceTotalText }}</span>
-                <span class="font-semibold text-gray-900 dark:text-white">{{ formatHeaderMoney(totalBalance) }}</span>
+            <svg
+              class="h-4 w-4 shrink-0 text-ui-action"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="1.6"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
+              />
+            </svg>
+            <span class="font-mono text-sm font-semibold tabular-nums text-ui-action">
+              {{ formatHeaderMoney(availableBalance) }}
+            </span>
+            <span
+              v-if="frozenBalance > 0"
+              class="rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+            >
+              {{ balanceFrozenLabel }}
+            </span>
+          </button>
+
+          <transition name="dropdown">
+            <div
+              v-if="balanceOpen"
+              id="header-balance-popover"
+              role="region"
+              :aria-label="t('common.balance')"
+              class="dropdown right-0 mt-2 w-60 p-3.5 text-xs tabular-nums"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-ui-subdued">{{ balanceAvailableText }}</span>
+                <span class="font-mono font-medium text-ui-ink">{{ formatHeaderMoney(availableBalance) }}</span>
+              </div>
+              <div class="mt-2 flex items-center justify-between gap-3">
+                <span class="text-ui-subdued">{{ balanceFrozenText }}</span>
+                <span class="font-mono font-medium text-amber-700 dark:text-amber-300">{{ formatHeaderMoney(frozenBalance) }}</span>
+              </div>
+              <div class="mt-2.5 border-t border-ui-line pt-2.5">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="font-medium text-ui-subdued">{{ balanceTotalText }}</span>
+                  <span class="font-mono font-semibold text-ui-ink">{{ formatHeaderMoney(totalBalance) }}</span>
+                </div>
               </div>
             </div>
-          </div>
+          </transition>
         </div>
 
         <!-- User Dropdown -->
         <div v-if="user" class="relative" ref="dropdownRef">
           <button
+            ref="userMenuButtonRef"
+            type="button"
             @click="toggleDropdown"
-            class="flex items-center gap-2 rounded-xl p-1.5 transition-colors hover:bg-gray-100 dark:hover:bg-dark-800"
+            class="flex min-h-10 items-center gap-2 rounded-lg p-1.5 transition-colors hover:bg-ui-muted/80"
             :aria-label="t('common.userMenu')"
+            :aria-expanded="dropdownOpen"
+            aria-haspopup="menu"
           >
-            <div class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-sm font-semibold text-primary-800 dark:bg-primary-900/60 dark:text-primary-200">
+            <div class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-ui-action/20 bg-ui-selected text-xs font-semibold text-ui-action">
               <img
                 v-if="avatarUrl"
                 :src="avatarUrl"
@@ -124,48 +147,54 @@
               <span v-else>{{ userInitials }}</span>
             </div>
             <div class="hidden text-left md:block">
-              <div class="max-w-32 truncate text-sm font-medium text-gray-900 dark:text-white">
+              <div class="max-w-32 truncate text-sm font-medium leading-tight text-ui-ink">
                 {{ displayName }}
               </div>
-              <div class="text-xs text-gray-500 dark:text-dark-400">
+              <div class="text-[11px] leading-tight text-ui-subdued">
                 {{ t('admin.users.roles.' + user.role) }}
               </div>
             </div>
-            <Icon name="chevronDown" size="sm" class="hidden text-gray-400 md:block" />
+            <Icon
+              name="chevronDown"
+              size="xs"
+              class="hidden text-ui-subdued transition-transform duration-150 md:block"
+              :class="{ 'rotate-180': dropdownOpen }"
+              aria-hidden="true"
+            />
           </button>
 
           <!-- Dropdown Menu -->
           <transition name="dropdown">
-            <div v-if="dropdownOpen" class="dropdown right-0 mt-2 w-56">
+            <div v-if="dropdownOpen" role="menu" class="dropdown right-0 mt-2 w-60">
               <!-- User Info -->
-              <div class="border-b border-gray-100 px-4 py-3 dark:border-dark-700">
-                <div class="text-sm font-medium text-gray-900 dark:text-white">
+              <div class="border-b border-ui-line px-4 py-3">
+                <div class="truncate text-sm font-semibold text-ui-ink">
                   {{ displayName }}
                 </div>
-                <div class="text-xs text-gray-500 dark:text-dark-400">{{ user.email }}</div>
+                <div class="truncate text-xs text-ui-subdued">{{ user.email }}</div>
               </div>
 
               <!-- Balance (mobile only) -->
-              <div class="border-b border-gray-100 px-4 py-2 dark:border-dark-700 sm:hidden">
-                <div class="text-xs text-gray-500 dark:text-dark-400">
+              <div class="border-b border-ui-line px-4 py-2.5 sm:hidden">
+                <div class="text-xs text-ui-subdued">
                   {{ t('common.balance') }}
                 </div>
-                <div class="text-sm font-semibold text-primary-600 dark:text-primary-400">
+                <div class="font-mono text-sm font-semibold tabular-nums text-ui-action">
                   {{ formatHeaderMoney(availableBalance) }}
                 </div>
-                <div v-if="frozenBalance > 0" class="mt-1 text-xs text-amber-600 dark:text-amber-300">
+                <div v-if="frozenBalance > 0" class="mt-1 font-mono text-xs tabular-nums text-amber-700 dark:text-amber-300">
                   {{ balanceFrozenText }} {{ formatHeaderMoney(frozenBalance) }}
                 </div>
               </div>
 
               <div class="py-1">
-                <router-link to="/profile" @click="closeDropdown" class="dropdown-item">
-                  <Icon name="user" size="sm" />
+                <router-link to="/profile" role="menuitem" @click="closeDropdown" class="dropdown-item">
+                  <Icon name="user" size="sm" class="text-ui-subdued" aria-hidden="true" />
                   {{ t('nav.profile') }}
                 </router-link>
 
-                <router-link to="/keys" @click="closeDropdown" class="dropdown-item">
-                  <Icon name="key" size="sm" />
+                <router-link to="/keys" role="menuitem" @click="closeDropdown" class="dropdown-item">
+                  <Icon name="key" size="sm" class="text-ui-subdued" aria-hidden="true" />
                   {{ t('nav.apiKeys') }}
                 </router-link>
 
@@ -174,10 +203,11 @@
                   href="https://github.com/Wei-Shaw/sub2api"
                   target="_blank"
                   rel="noopener noreferrer"
+                  role="menuitem"
                   @click="closeDropdown"
                   class="dropdown-item"
                 >
-                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <svg class="h-4 w-4 text-ui-subdued" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       fill-rule="evenodd"
                       clip-rule="evenodd"
@@ -186,21 +216,21 @@
                   </svg>
                   {{ t('nav.github') }}
                 </a>
-
               </div>
 
               <!-- Contact Support (only show if configured) -->
               <div
                 v-if="contactInfo"
-                class="border-t border-gray-100 px-4 py-2.5 dark:border-dark-700"
+                class="border-t border-ui-line px-4 py-2.5"
               >
-                <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <div class="flex items-center gap-2 text-xs text-ui-subdued">
                   <svg
                     class="h-3.5 w-3.5 flex-shrink-0"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     stroke-width="1.5"
+                    aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"
@@ -209,15 +239,13 @@
                     />
                   </svg>
                   <span>{{ t('common.contactSupport') }}:</span>
-                  <span class="font-medium text-gray-700 dark:text-gray-300">{{
-                    contactInfo
-                  }}</span>
+                  <span class="truncate font-medium text-ui-ink">{{ contactInfo }}</span>
                 </div>
               </div>
 
-              <div v-if="showOnboardingButton" class="border-t border-gray-100 py-1 dark:border-dark-700">
-                <button @click="handleReplayGuide" class="dropdown-item w-full">
-                  <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+              <div v-if="showOnboardingButton" class="border-t border-ui-line py-1">
+                <button type="button" role="menuitem" @click="handleReplayGuide" class="dropdown-item w-full">
+                  <svg class="h-4 w-4 text-ui-subdued" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path
                       d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 14a1 1 0 110 2 1 1 0 010-2zm1.07-7.75c0-.6-.49-1.25-1.32-1.25-.7 0-1.22.4-1.43 1.02a1 1 0 11-1.9-.62A3.41 3.41 0 0111.8 5c2.02 0 3.25 1.4 3.25 2.9 0 2-1.83 2.55-2.43 3.12-.43.4-.47.75-.47 1.23a1 1 0 01-2 0c0-1 .16-1.82 1.1-2.7.69-.64 1.82-1.05 1.82-2.06z"
                     />
@@ -226,10 +254,12 @@
                 </button>
               </div>
 
-              <div class="border-t border-gray-100 py-1 dark:border-dark-700">
+              <div class="border-t border-ui-line py-1">
                 <button
+                  type="button"
+                  role="menuitem"
                   @click="handleLogout"
-                  class="dropdown-item w-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                  class="dropdown-item w-full text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/35"
                 >
                   <svg
                     class="h-4 w-4"
@@ -237,6 +267,7 @@
                     viewBox="0 0 24 24"
                     stroke="currentColor"
                     stroke-width="1.5"
+                    aria-hidden="true"
                   >
                     <path
                       stroke-linecap="round"
@@ -288,6 +319,11 @@ watch(() => appStore.mobileOpen, (open, wasOpen) => {
 const user = computed(() => authStore.user)
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const userMenuButtonRef = ref<HTMLButtonElement | null>(null)
+const balanceOpen = ref(false)
+const balanceRef = ref<HTMLElement | null>(null)
+const balanceButtonRef = ref<HTMLButtonElement | null>(null)
+
 const contactInfo = computed(() => appStore.contactInfo)
 const docUrl = computed(() => sanitizeUrl(appStore.docUrl))
 const modelPlazaEnabled = computed(() => isFeatureFlagEnabled(FeatureFlags.modelPlaza))
@@ -307,12 +343,10 @@ const showOnboardingButton = computed(() => {
 
 const userInitials = computed(() => {
   if (!user.value) return ''
-  // Prefer username, fallback to email
   if (user.value.username) {
     return user.value.username.substring(0, 2).toUpperCase()
   }
   if (user.value.email) {
-    // Get the part before @ and take first 2 chars
     const localPart = user.value.email.split('@')[0]
     return localPart.substring(0, 2).toUpperCase()
   }
@@ -333,7 +367,6 @@ const routeMetaKeys = computed(() => resolveRouteMetaKeys(route, {
 }))
 
 const pageTitle = computed(() => {
-  // For custom pages, use the menu item's label instead of generic "自定义页面"
   if (route.name === 'CustomPage') {
     const id = route.params.id as string
     const publicItems = appStore.cachedPublicSettings?.custom_menu_items ?? []
@@ -361,6 +394,7 @@ function toggleMobileSidebar() {
 }
 
 function toggleDropdown() {
+  balanceOpen.value = false
   dropdownOpen.value = !dropdownOpen.value
 }
 
@@ -368,12 +402,20 @@ function closeDropdown() {
   dropdownOpen.value = false
 }
 
+function toggleBalance() {
+  dropdownOpen.value = false
+  balanceOpen.value = !balanceOpen.value
+}
+
+function closeBalance() {
+  balanceOpen.value = false
+}
+
 async function handleLogout() {
   closeDropdown()
   try {
     await authStore.logout()
   } catch (error) {
-    // Ignore logout errors - still redirect to login
     console.error('Logout error:', error)
   }
   await router.push('/login')
@@ -390,29 +432,49 @@ function formatHeaderMoney(value: number) {
 }
 
 function handleClickOutside(event: MouseEvent) {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target as Node)) {
+  const target = event.target as Node
+  if (dropdownRef.value && !dropdownRef.value.contains(target)) {
     closeDropdown()
+  }
+  if (balanceRef.value && !balanceRef.value.contains(target)) {
+    closeBalance()
+  }
+}
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape') return
+  if (dropdownOpen.value) {
+    closeDropdown()
+    userMenuButtonRef.value?.focus({ preventScroll: true })
+  }
+  if (balanceOpen.value) {
+    closeBalance()
+    balanceButtonRef.value?.focus({ preventScroll: true })
   }
 }
 
 onMounted(() => {
   document.addEventListener('click', handleClickOutside)
+  document.addEventListener('keydown', handleKeydown)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
+  document.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
 <style scoped>
 .dropdown-enter-active,
 .dropdown-leave-active {
-  transition: all 0.2s ease;
+  transition:
+    opacity 150ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .dropdown-enter-from,
 .dropdown-leave-to {
   opacity: 0;
-  transform: scale(0.95) translateY(-4px);
+  transform: scale(0.97) translateY(-4px);
 }
 </style>

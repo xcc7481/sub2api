@@ -28,11 +28,12 @@
             :api-base-url="publicSettings?.api_base_url || ''"
             :custom-endpoints="publicSettings?.custom_endpoints || []"
           />
-          <div v-if="selectedIds.length" class="flex flex-wrap items-center gap-3 text-sm">
-            <span class="text-gray-600 dark:text-gray-300">
+          <div v-if="selectedIds.length" class="flex flex-wrap items-center gap-3 rounded-lg border border-ui-action/20 bg-ui-selected/65 px-3.5 py-2 text-sm">
+            <span class="font-medium text-ui-ink tabular-nums">
               {{ t('keys.bulkEdit.selectedCount', { count: selectedIds.length }) }}
             </span>
             <button
+              type="button"
               class="btn btn-primary btn-sm"
               :disabled="loading"
               data-test="bulk-edit-keys"
@@ -40,7 +41,7 @@
             >
               {{ t('keys.bulkEdit.title') }}
             </button>
-            <button class="btn btn-secondary btn-sm" @click="selectedIds = []">
+            <button type="button" class="btn btn-secondary btn-sm" @click="selectedIds = []">
               {{ t('keys.bulkEdit.clearSelection') }}
             </button>
           </div>
@@ -48,49 +49,55 @@
       </template>
 
       <template #actions>
-        <div class="flex justify-end gap-3">
+        <div class="flex flex-wrap items-center justify-end gap-2.5">
           <button
+            type="button"
             @click="loadApiKeys"
             :disabled="loading"
-            class="btn btn-secondary"
+            class="btn btn-secondary btn-icon"
             :title="t('common.refresh')"
+            :aria-label="t('common.refresh')"
           >
-            <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
+            <Icon name="refresh" size="sm" :class="loading ? 'animate-spin' : ''" aria-hidden="true" />
           </button>
           <div class="relative" ref="columnDropdownRef">
             <button
+              type="button"
               @click="showColumnDropdown = !showColumnDropdown"
-              class="btn btn-secondary px-2 md:px-3"
+              :aria-expanded="showColumnDropdown"
+              class="btn btn-secondary px-2.5 md:px-3"
               :title="t('keys.columnSettings')"
             >
-              <svg class="h-4 w-4 md:mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+              <svg class="h-4 w-4 md:mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125z" />
               </svg>
               <span class="hidden md:inline">{{ t('keys.columnSettings') }}</span>
             </button>
             <div
               v-if="showColumnDropdown"
-              class="absolute right-0 top-full z-50 mt-1 max-h-80 w-48 overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-dark-600 dark:bg-dark-800"
+              class="dropdown right-0 top-full mt-1.5 max-h-80 w-48 overflow-y-auto"
             >
               <button
                 v-for="col in toggleableColumns"
                 :key="col.key"
+                type="button"
                 @click="toggleColumn(col.key)"
-                class="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
+                class="dropdown-item w-full justify-between text-left"
               >
                 <span>{{ col.label }}</span>
                 <Icon
                   v-if="isColumnVisible(col.key)"
                   name="check"
                   size="sm"
-                  class="text-primary-500"
+                  class="text-ui-action"
                   :stroke-width="2"
+                  aria-hidden="true"
                 />
               </button>
             </div>
           </div>
-          <button @click="showCreateModal = true" class="btn btn-primary" data-tour="keys-create-btn">
-            <Icon name="plus" size="md" class="mr-2" />
+          <button type="button" @click="showCreateModal = true" class="btn btn-primary" data-tour="keys-create-btn">
+            <Icon name="plus" size="sm" aria-hidden="true" />
             {{ t('keys.createKey') }}
           </button>
         </div>
